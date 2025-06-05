@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { supabase } from "~/supabase";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 export default function Register() {
   const [displayname, setName] = useState<string>("");

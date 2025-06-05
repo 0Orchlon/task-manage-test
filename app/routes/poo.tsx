@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '~/supabase';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 export default function Poo() {
   const [email, setEmail] = useState<string | null>(null);
