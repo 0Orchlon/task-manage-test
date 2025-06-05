@@ -1,27 +1,33 @@
-import { useState } from 'react'
-import type { FormEvent } from 'react';
-import { supabase } from '~/supabase'
-import { useNavigate } from 'react-router-dom'
+import { useState } from "react";
+import type { FormEvent } from "react";
+import { supabase } from "~/supabase";
+import { useNavigate } from "react-router-dom";
 
 export default function Register() {
-  const [email, setEmail] = useState<string>('')
-  const [password, setPassword] = useState<string>('')
-  const [error, setError] = useState<string | null>(null)
-  const navigate = useNavigate()
+  const [displayname, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleRegister = async (e: FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     const { error } = await supabase.auth.signUp({
       email,
       password,
-    })
+      options: {
+        data: {
+          displayname,
+        },
+      },
+    });
     if (error) {
-      setError(error.message)
+      setError(error.message);
     } else {
-      alert('Check your email to confirm registration.')
-      navigate('/login')
+      alert("Check your email to confirm registration.");
+      navigate("/login");
     }
-  }
+  };
 
   return (
     <div>
@@ -35,6 +41,12 @@ export default function Register() {
           required
         />
         <input
+          type="text"
+          placeholder="User Name"
+          value={displayname}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <input
           type="password"
           placeholder="Password"
           value={password}
@@ -43,7 +55,7 @@ export default function Register() {
         />
         <button type="submit">Register</button>
       </form>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
-  )
+  );
 }
