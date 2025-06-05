@@ -30,7 +30,7 @@ async function getInstruments() {
 }
   return (
     <ul>
-        {instruments.length === 0 && <li>No data</li>}
+      {instruments.length === 0 && <li>No data</li>}
       {instruments.map((instrument, index) => (
         <li key={index}>
           {instrument.get_gud} - {instrument.created_at} - {instrument.gg}

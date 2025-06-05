@@ -3,30 +3,29 @@ import type { FormEvent } from 'react';
 import { supabase } from '~/supabase'
 import { useNavigate } from 'react-router-dom'
 
-export default function Register() {
+export default function Login() {
   const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
 
-  const handleRegister = async (e: FormEvent) => {
+  const handleLogin = async (e: FormEvent) => {
     e.preventDefault()
-    const { error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
     if (error) {
       setError(error.message)
     } else {
-      alert('Check your email to confirm registration.')
-      navigate('/login')
+      navigate('/poo')
     }
   }
 
   return (
     <div>
-      <h2>Register</h2>
-      <form onSubmit={handleRegister}>
+      <h2>Login</h2>
+      <form onSubmit={handleLogin}>
         <input
           type="email"
           placeholder="Email"
@@ -41,7 +40,7 @@ export default function Register() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button type="submit">Register</button>
+        <button type="submit">Login</button>
       </form>
       {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
