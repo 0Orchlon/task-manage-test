@@ -30,6 +30,20 @@ export default function Poo() {
       ) : (
         <p>Not logged in</p>
       )}
+<button
+  onClick={async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("Logout failed:", error.message);
+    } else {
+      // Optional: redirect to login page or homepage
+      window.location.href = "/login"; // or use useNavigate()
+    }
+  }}
+>
+  Log out
+</button>
+
     </div>
   );
 }
