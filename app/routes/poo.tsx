@@ -1,14 +1,13 @@
-// poo.tsx
 import { useEffect, useState } from 'react';
 import { supabase } from '~/supabase';
 import { useNavigate } from 'react-router-dom';
 
 export default function Poo() {
   const [email, setEmail] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch the current user
     const getUserEmail = async () => {
       const { data, error } = await supabase.auth.getUser();
       if (error) {
@@ -16,7 +15,9 @@ export default function Poo() {
         setEmail(null);
         return;
       }
+      console.log(data)
       setEmail(data.user?.email ?? null);
+      setUsername(data.user?.user_metadata?.displayname ?? null); // ← ✅ ADD THIS
     };
 
     getUserEmail();
@@ -26,24 +27,26 @@ export default function Poo() {
     <div>
       <h2>Welcome</h2>
       {email ? (
-        <p>You are logged in as <strong>{email}</strong></p>
+        <>
+          <p>You are logged in as <strong>{email}</strong></p>
+          {username && <p>Welcome <strong>{username}</strong></p>}
+        </>
       ) : (
         <p>Not logged in</p>
       )}
-<button
-  onClick={async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error("Logout failed:", error.message);
-    } else {
-      // Optional: redirect to login page or homepage
-      window.location.href = "/login"; // or use useNavigate()
-    }
-  }}
->
-  Log out
-</button>
 
+      <button
+        onClick={async () => {
+          const { error } = await supabase.auth.signOut();
+          if (error) {
+            console.error("Logout failed:", error.message);
+          } else {
+            navigate("/login"); // ✅ or window.location.href = "/login";
+          }
+        }}
+      >
+        Log out
+      </button>
     </div>
   );
 }
