@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "~/supabase";
 import { useNavigate } from "react-router";
 import type { Route } from "./+types/home";
+import Sidebar from "./sidebar";
+import Navbar from "./navbar";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -65,53 +67,52 @@ export default function Home() {
     checkUser();
   }, [navigate]);
 
-const addNewProject = async () => {
-  setError(null);
+  const addNewProject = async () => {
+    setError(null);
 
-  if (!newProjectName.trim()) {
-    setError("Төслийн нэрийг оруулна уу.");
-    return;
-  }
-
-  try {
-    const { data: insertedData, error: insertError } = await supabase
-      .from("t_project")
-      .insert([{ proname: newProjectName, proownuid: user.id }])
-      .select();
-
-    if (insertError) {
-      setError(`Шинэ төсөл нэмэхэд алдаа гарлаа: ${insertError.message}`);
+    if (!newProjectName.trim()) {
+      setError("Төслийн нэрийг оруулна уу.");
       return;
     }
 
-    if (!insertedData || insertedData.length === 0) {
-      setError("Төсөл амжилттай нэмэгдсэн боловч өгөгдөл буцаагдсангүй.");
-      return;
+    try {
+      const { data: insertedData, error: insertError } = await supabase
+        .from("t_project")
+        .insert([{ proname: newProjectName, proownuid: user.id }])
+        .select();
+
+      if (insertError) {
+        setError(`Шинэ төсөл нэмэхэд алдаа гарлаа: ${insertError.message}`);
+        return;
+      }
+
+      if (!insertedData || insertedData.length === 0) {
+        setError("Төсөл амжилттай нэмэгдсэн боловч өгөгдөл буцаагдсангүй.");
+        return;
+      }
+
+      const newProject = insertedData[0];
+
+      const { error: userLinkError } = await supabase
+        .from("t_project_users")
+        .insert([{
+          proid: newProject.proid,
+          uid: user.id,
+          share_id: Math.floor(Math.random() * 1000000),
+        }]);
+
+      if (userLinkError) {
+        setError(`Төсөлтэй хэрэглэгчийг холбоход алдаа гарлаа: ${userLinkError.message}`);
+        return;
+      }
+
+      setProjects([...projects, newProject]);
+      setNewProjectName("");
+      setShowModal(false);
+    } catch (e) {
+      setError(`Алдаа гарлаа: ${e instanceof Error ? e.message : String(e)}`);
     }
-
-    const newProject = insertedData[0];
-
-    const { error: userLinkError } = await supabase
-      .from("t_project_users")
-      .insert([{
-        proid: newProject.proid,
-        uid: user.id,
-         share_id: Math.floor(Math.random() * 1000000),
-      }]);
-
-    if (userLinkError) {
-      setError(`Төсөлтэй хэрэглэгчийг холбоход алдаа гарлаа: ${userLinkError.message}`);
-      return;
-    }
-
-    setProjects([...projects, newProject]);
-    setNewProjectName("");
-    setShowModal(false);
-  } catch (e) {
-    setError(`Алдаа гарлаа: ${e instanceof Error ? e.message : String(e)}`);
-  }
-};
-
+  };
 
   if (!user) {
     return null;
@@ -119,57 +120,18 @@ const addNewProject = async () => {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* sidebar */}
-      <aside className="w-64 bg-gray-800 text-white p-4 flex flex-col">
-        <h2 className="text-lg font-semibold mb-4">NOTIFICATION</h2>
-        <ul className="space-y-2">
-          <li>1</li>
-          <li>2</li>
-          <li>3</li>
-        </ul>
-        <h2 className="text-lg font-semibold mt-6 mb-4">PROJECTS</h2>
-        <ul className="space-y-2">
-          {projects.length === 0 && <li className="text-gray-400">Project байхгүй</li>}
-          {projects.map((project) => (
-            <li key={project.proid}>
-              {project.proname} <span className="text-gray-400">➜</span>
-            </li>
-          ))}
-          <li
-            className="text-blue-400 cursor-pointer"
-            onClick={() => setShowModal(true)}
-          >
-            + NEW PROJECT
-          </li>
-        </ul>
-      </aside>
+      {/* Sidebar компонент ашиглах */}
+      <Sidebar 
+        projects={projects} 
+        onNewProject={() => setShowModal(true)} 
+      />
 
-      {/* main content */}
+      {/* Үндсэн агуулга */}
       <div className="flex-1 flex flex-col">
-        {/* navbar */}
-<nav className="bg-white shadow-md p-4 flex justify-between items-center">
-  <h1 className="text-xl font-bold">Даалгаврын Удирдлага</h1>
+        {/* Navbar компонент ашиглах */}
+        <Navbar user={user} />
 
-  <div className="flex items-center space-x-4">
-    <img
-      src="https://via.placeholder.com/40"
-      alt="Profile"
-      className="w-10 h-10 rounded-full"
-    />
-    <button
-      onClick={async () => {
-        await supabase.auth.signOut();
-        navigate("/login");
-      }}
-      className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200"
-    >
-      Гарах
-    </button>
-  </div>
-</nav>
-
-
-        {/* content */}
+        {/* Агуулга */}
         <div className="p-8">
           <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
             Тавтай морил, {user.user_metadata?.displayname || user.email}!
@@ -198,7 +160,6 @@ const addNewProject = async () => {
               </li>
             ))}
           </ul>
-
         </div>
       </div>
 
