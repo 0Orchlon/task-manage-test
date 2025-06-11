@@ -28,12 +28,16 @@ async function getInstruments() {
 
   }
 }
+function formatDate(timestamp: string){
+  const date = new Date(timestamp);
+  return date.toLocaleString();
+}
   return (
     <ul>
       {instruments.length === 0 && <li>No data</li>}
       {instruments.map((instrument, index) => (
         <li key={index}>
-          {instrument.get_gud} - {instrument.created_at} - {instrument.gg}
+          {instrument.get_gud} - {formatDate(instrument.created_at)} - {instrument.gg}
         </li>
       ))}
     </ul>
