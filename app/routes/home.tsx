@@ -5,12 +5,13 @@ import type { Route } from "./+types/home";
 import Sidebar from "./sidebar";
 import Navbar from "./navbar";
 
-export function meta({}: Route.MetaArgs) {
+// Meta функцыг объект болгон өөрчлөх
+export const meta = ({}: Route.MetaArgs) => {
   return [
     { title: "Даалгаврын Удирдлага" },
     { name: "description", content: "Таны даалгавруудыг удирдах апп" },
   ];
-}
+};
 
 export default function Home() {
   const [user, setUser] = useState<any>(null);
@@ -115,7 +116,7 @@ export default function Home() {
   };
 
   if (!user) {
-    return null;
+    return <div>Ачааллаж байна...</div>;
   }
 
   return (
