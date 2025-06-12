@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { supabase } from "~/supabase";
 import { useNavigate } from "react-router";
 
@@ -10,6 +10,19 @@ export default function ChangePassword() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: authData } = await supabase.auth.getUser();
+      if (authData.user?.email) {
+        setEmail(authData.user.email)
+    }else{
+        navigate("/login")
+    }
+    };
+    checkUser();
+  }, [navigate]);
+
 
   const handleChangePassword = async (e: FormEvent) => {
     e.preventDefault();
@@ -52,15 +65,16 @@ export default function ChangePassword() {
         <h2 className="text-2xl font-bold mb-6 text-center text-black">
           Change Password
         </h2>
+        <p>{email}</p>
         <form onSubmit={handleChangePassword} className="space-y-4">
-          <input
+          {/* <input
             type="email"
-            placeholder="Your email"
+            placeholder="Your Email Here"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required
+            // required
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-black"
-          />
+          /> */}
           <input
             type="password"
             placeholder="Current password"

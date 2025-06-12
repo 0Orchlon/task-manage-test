@@ -128,6 +128,14 @@ export default function Poo() {
           </button>
           <button
             onClick={async () => {
+              navigate("/changepass");
+            }}
+            className="px-4 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-md text-sm"
+          >
+            Change Password
+          </button>
+          <button
+            onClick={async () => {
               const { error } = await supabase.auth.signOut();
               if (error) {
                 console.error("Logout failed:", error.message);
