@@ -1,9 +1,11 @@
-// routes.ts
 import { type RouteConfig, index, route } from "@react-router/dev/routes";
-// add more routes if needed
-export default [index("routes/home.tsx"),
-    route("login", "routes/login.tsx"),
-    route("register", "routes/register.tsx"),
-// this poo is a test profile page
-    route("poo", "routes/poo.tsx")
+
+export default [
+  index("routes/home.tsx"),
+  route("/login", "routes/login.tsx"),
+  route("/register", "routes/register.tsx"),
+  route("/poo", "routes/poo.tsx"),
+  
+  // DevTools-ийн хүсэлтийг зөвшөөрөх
+  route("/.well-known/*", "routes/well-known.tsx"),
 ] satisfies RouteConfig;
