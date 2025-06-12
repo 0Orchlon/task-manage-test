@@ -4,6 +4,7 @@ import { useNavigate } from "react-router";
 import type { Route } from "./+types/home";
 import Sidebar from "./sidebar";
 import Navbar from "./navbar";
+import KanbanBoard from "./kanbanBoard";
 
 // Meta функцыг объект болгон өөрчлөх
 export const meta = ({}: Route.MetaArgs) => {
@@ -45,22 +46,22 @@ export default function Home() {
       } else {
         setTasks(tasksData || []);
       }
-
+      
       const { data: projectUser, error: projectUserError } = await supabase
-        .from("t_project_users")
-        .select("proid")
-        .eq("uid", data.user.id);
-
+      .from("t_project_users")
+      .select("proid")
+      .eq("uid", data.user.id);
+      
       if (projectUserError) {
         setError(`Даалгаврыг харуулахад алдаа гарлаа: ${projectUserError.message}`);
         return;
       }
-
+      
       const projectIds = projectUser.map((pu: any) => pu.proid);
       const { data: projectsData, error: projectsError } = await supabase
-        .from("t_project")
-        .select("proid, proname")
-        .in("proid", projectIds);
+      .from("t_project")
+      .select("proid, proname")
+      .in("proid", projectIds);
 
       if (projectsError) {
         setError(`Төслийг татахад алдаа гарлаа: ${projectsError.message}`);
@@ -68,75 +69,49 @@ export default function Home() {
         setProjects(projectsData || []);
       }
     };
-
+    
     checkUser();
   }, [navigate]);
-  useEffect(() => {
-    const getUserData = async () => {
-      const { data: authData, error: authError } =
-        await supabase.auth.getUser();
-      if (authError || !authData.user) {
-        console.error("Error getting user:", authError?.message);
-        return;
-      }
-
-      const uid = authData.user.id;
-      setEmail(authData.user.email ?? null);
-      setUserId(uid);
-
-      const { data: profileData, error: profileError } = await supabase
-        .from("t_users")
-        .select("uname, image")
-        .eq("uid", uid)
-        .single();
-
-      if (!profileError && profileData) {
-        setUsername(profileData.uname);
-        setImageUrl(profileData.image);
-      }
-    }
-    getUserData();
-  }, []);
 
   const addNewProject = async () => {
     setError(null);
-
+    
     if (!newProjectName.trim()) {
       setError("Төслийн нэрийг оруулна уу.");
       return;
     }
-
+    
     try {
       const { data: insertedData, error: insertError } = await supabase
-        .from("t_project")
-        .insert([{ proname: newProjectName, proownuid: user.id }])
-        .select();
-
+      .from("t_project")
+      .insert([{ proname: newProjectName, proownuid: user.id }])
+      .select();
+      
       if (insertError) {
         setError(`Шинэ төсөл нэмэхэд алдаа гарлаа: ${insertError.message}`);
         return;
       }
-
+      
       if (!insertedData || insertedData.length === 0) {
         setError("Төсөл амжилттай нэмэгдсэн боловч өгөгдөл буцаагдсангүй.");
         return;
       }
-
+      
       const newProject = insertedData[0];
-
+      
       const { error: userLinkError } = await supabase
-        .from("t_project_users")
-        .insert([{
-          proid: newProject.proid,
-          uid: user.id,
-          share_id: Math.floor(Math.random() * 1000000),
-        }]);
-
+      .from("t_project_users")
+      .insert([{
+        proid: newProject.proid,
+        uid: user.id,
+        share_id: Math.floor(Math.random() * 1000000),
+      }]);
+      
       if (userLinkError) {
         setError(`Төсөлтэй хэрэглэгчийг холбоход алдаа гарлаа: ${userLinkError.message}`);
         return;
       }
-
+      
       setProjects([...projects, newProject]);
       setNewProjectName("");
       setShowModal(false);
@@ -144,11 +119,12 @@ export default function Home() {
       setError(`Алдаа гарлаа: ${e instanceof Error ? e.message : String(e)}`);
     }
   };
-
+  
   if (!user) {
     return <div>Ачааллаж байна...</div>;
   }
-
+  console.log("Fetched tasks:", tasks);
+  
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar компонент ашиглах */}
@@ -167,29 +143,10 @@ export default function Home() {
             Тавтай морил, {username}!
           </h2>
           {error && <p className="mb-4 text-red-500 text-center">{error}</p>}
-          <h3 className="text-xl font-semibold mb-4">Таны даалгаврууд</h3>
-          <ul className="divide-y divide-gray-200">
-            {tasks.length === 0 && !error && (
-              <li className="py-2 text-center text-gray-500">Даалгавар байхгүй</li>
-            )}
-            {tasks.map((task) => (
-              <li key={task.tid} className="py-2">
-                <span className="font-semibold">{task.title}</span> -{" "}
-                <span className="text-gray-500">{task.due_date}</span> -{" "}
-                <span
-                  className={`capitalize ${
-                    task.priority === "high"
-                      ? "text-red-500"
-                      : task.priority === "medium"
-                      ? "text-yellow-500"
-                      : "text-green-500"
-                  }`}
-                >
-                  {task.priority}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <h3 className="text-xl font-semibold mb-4 text-black">Таны даалгаврууд</h3>
+
+          <KanbanBoard tasks={tasks} />
+
         </div>
       </div>
 
@@ -197,12 +154,12 @@ export default function Home() {
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-            <h3 className="text-lg font-semibold mb-4">Шинэ Төсөл Нэмэх</h3>
+            <h3 className="text-lg font-semibold mb-4 text-black">Шинэ Төсөл Нэмэх</h3>
             <input
               type="text"
               value={newProjectName}
               onChange={(e) => setNewProjectName(e.target.value)}
-              className="w-full p-2 mb-4 border rounded"
+              className="w-full p-2 mb-4 border rounded text-black"
               placeholder="Төслийн нэрийг оруулна уу"
             />
             <div className="flex justify-end space-x-4">
