@@ -123,9 +123,8 @@ export default function Home() {
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar компонент ашиглах */}
       <Sidebar 
-        projects={projects} 
-        onNewProject={() => setShowModal(true)} 
-      />
+        projects={projects}
+        onNewProject={() => setShowModal(true)} tasks={[]}      />
 
       {/* Үндсэн агуулга */}
       <div className="flex-1 flex flex-col">
