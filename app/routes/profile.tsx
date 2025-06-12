@@ -16,14 +16,16 @@ export default function Poo() {
   const [username, setUsername] = useState<string | null>(null);
   const [newUsername, setNewUsername] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
-  const [projects, setProjects] = useState<{ proid: number; proname: string }[]>([]);
+  const [projects, setProjects] = useState<
+    { proid: number; proname: string }[]
+  >([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     const getUserData = async () => {
-      const { data: authData, error: authError } = await supabase.auth.getUser();
+      const { data: authData, error: authError } =
+        await supabase.auth.getUser();
       if (authError || !authData.user) {
         console.error("Error getting user:", authError?.message);
         return;
@@ -55,7 +57,8 @@ export default function Poo() {
         .select("proid")
         .eq("uid", uid);
 
-      const sharedProIds = sharedProjectsData?.map((entry) => entry.proid) ?? [];
+      const sharedProIds =
+        sharedProjectsData?.map((entry) => entry.proid) ?? [];
 
       let sharedProjects: { proid: number; proname: string }[] = [];
       if (sharedProIds.length > 0) {
@@ -81,70 +84,19 @@ export default function Poo() {
     getUserData();
   }, []);
 
-  const handleUpdateProfile = async () => {
-    const updatedName = newUsername.trim() || username;
-    if (!updatedName && !imageUrl) {
-      alert("Please set a username or upload an image.");
-      return;
-    }
-
-    if (!userId) {
-      alert("User not loaded");
-      return;
-    }
-
-    const { error } = await supabase.from("t_users").upsert({
-      uid: userId,
-      uname: updatedName,
-      image: imageUrl,
-    });
-
-    if (error) {
-      console.error("Failed to update profile:", error.message);
-      alert("Failed to update profile");
-      return;
-    }
-
-    alert("Profile updated!");
-    setUsername(updatedName);
-    setNewUsername("");
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
-
-    const prefix = randomPrefix(8);
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${prefix}_${Date.now()}.${fileExt}`;
-    const filePath = `avatars/${fileName}`;
-
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from("profilepic")
-      .upload(filePath, file, {
-        cacheControl: "3600",
-        upsert: false,
-      });
-
-    if (uploadError) {
-      console.error("Upload failed:", uploadError.message);
-      alert("Upload failed");
-      setUploading(false);
-      return;
-    }
-
-    const { data } = supabase.storage.from("profilepic").getPublicUrl(filePath);
-    setImageUrl(data.publicUrl);
-    setUploading(false);
-  };
-
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-black">Your Profile</h2>
+          <button
+            onClick={async () => {
+              navigate("/poo");
+            }}
+            className="px-4 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-md text-sm"
+          >
+            Edit profile
+          </button>
           <button
             onClick={async () => {
               const { error } = await supabase.auth.signOut();
@@ -179,7 +131,9 @@ export default function Poo() {
             )}
             {/* 👇 Project list section */}
             <div className="mt-8">
-              <h3 className="text-lg font-semibold mb-2 text-black">Your Projects</h3>
+              <h3 className="text-lg font-semibold mb-2 text-black">
+                Your Projects
+              </h3>
               {projects.length === 0 ? (
                 <p className="text-gray-500">No projects found.</p>
               ) : (

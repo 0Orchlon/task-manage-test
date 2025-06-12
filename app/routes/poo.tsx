@@ -117,6 +117,14 @@ export default function Poo() {
       <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-black">Your Profile</h2>
+                    <button
+            onClick={async () => {
+              navigate("/profile");
+            }}
+            className="px-4 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-md text-sm"
+          >
+            Back to profile
+          </button>
           <button
             onClick={async () => {
               const { error } = await supabase.auth.signOut();
