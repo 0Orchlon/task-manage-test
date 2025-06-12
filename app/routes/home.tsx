@@ -4,7 +4,7 @@ import App from "~/App";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "New React Router App" },
+    { title: "New React Router" },
     { name: "description", content: "Welcome to React Router!" },
   ];
 }
