@@ -2,15 +2,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "~/supabase";
 import { useNavigate } from "react-router";
 
-function randomPrefix(length = 8) {
-  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-  let result = "";
-  for (let i = 0; i < length; i++) {
-    result += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return result;
-}
-
 export default function Poo() {
   const [email, setEmail] = useState<string | null>(null);
   const [username, setUsername] = useState<string | null>(null);
@@ -21,7 +12,40 @@ export default function Poo() {
     { proid: number; proname: string }[]
   >([]);
   const navigate = useNavigate();
+useEffect(() => {
+  const getUserData = async () => {
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+    if (authError || !authData.user) {
+      console.error("Error getting user:", authError?.message);
+      setEmail(null);
+      setUsername(null);
+      setImageUrl(null);
+      navigate("/");
+      return;
+    }
 
+    setEmail(authData.user.email ?? null);
+    setUserId(authData.user.id);
+
+    const { data: profileData, error: profileError } = await supabase
+      .from("t_users")
+      .select("uname, image")
+      .eq("uid", authData.user.id)
+      .single();
+
+    if (profileError) {
+      console.error("Error getting profile data:", profileError.message);
+      setUsername(null);
+      setImageUrl(null);
+      return;
+    }
+
+    setUsername(profileData.uname);
+    setImageUrl(profileData.image);
+  };
+
+  getUserData();
+}, [navigate]);
   useEffect(() => {
     const getUserData = async () => {
       const { data: authData, error: authError } =

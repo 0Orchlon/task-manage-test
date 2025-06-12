@@ -24,6 +24,7 @@ export default function Poo() {
     const getUserData = async () => {
       const { data: authData, error: authError } = await supabase.auth.getUser();
       if (authError || !authData.user) {
+        navigate("/")
         console.error("Error getting user:", authError?.message);
         setEmail(null);
         setUsername(null);
