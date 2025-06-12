@@ -5,5 +5,6 @@ export default [index("routes/home.tsx"),
     route("login", "routes/login.tsx"),
     route("register", "routes/register.tsx"),
 // this poo is a test profile page
-    route("poo", "routes/poo.tsx")
+    route("poo", "routes/poo.tsx"),
+    route("profile", "routes/profile.tsx"),
 ] satisfies RouteConfig;

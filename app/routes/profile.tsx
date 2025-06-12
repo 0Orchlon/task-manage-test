@@ -18,6 +18,7 @@ export default function Poo() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [projects, setProjects] = useState<{ proid: number; proname: string }[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,29 +26,56 @@ export default function Poo() {
       const { data: authData, error: authError } = await supabase.auth.getUser();
       if (authError || !authData.user) {
         console.error("Error getting user:", authError?.message);
-        setEmail(null);
-        setUsername(null);
-        setImageUrl(null);
         return;
       }
+
+      const uid = authData.user.id;
       setEmail(authData.user.email ?? null);
-      setUserId(authData.user.id);
+      setUserId(uid);
 
       const { data: profileData, error: profileError } = await supabase
         .from("t_users")
         .select("uname, image")
-        .eq("uid", authData.user.id)
+        .eq("uid", uid)
         .single();
 
-      if (profileError) {
-        console.error("Error getting profile data:", profileError.message);
-        setUsername(null);
-        setImageUrl(null);
-        return;
+      if (!profileError && profileData) {
+        setUsername(profileData.uname);
+        setImageUrl(profileData.image);
       }
 
-      setUsername(profileData.uname);
-      setImageUrl(profileData.image);
+      // Fetch projects: owned or shared
+      const { data: ownedProjects, error: ownErr } = await supabase
+        .from("t_project")
+        .select("proid, proname")
+        .eq("proownuid", uid);
+
+      const { data: sharedProjectsData, error: sharedErr } = await supabase
+        .from("t_project_users")
+        .select("proid")
+        .eq("uid", uid);
+
+      const sharedProIds = sharedProjectsData?.map((entry) => entry.proid) ?? [];
+
+      let sharedProjects: { proid: number; proname: string }[] = [];
+      if (sharedProIds.length > 0) {
+        const { data: spData, error: spErr } = await supabase
+          .from("t_project")
+          .select("proid, proname")
+          .in("proid", sharedProIds);
+        if (!spErr && spData) {
+          sharedProjects = spData;
+        }
+      }
+
+      const allProjects = [...(ownedProjects ?? []), ...sharedProjects];
+
+      // Remove duplicates by proid
+      const uniqueProjects = Array.from(
+        new Map(allProjects.map((proj) => [proj.proid, proj])).values()
+      );
+
+      setProjects(uniqueProjects);
     };
 
     getUserData();
@@ -134,10 +162,6 @@ export default function Poo() {
 
         {email ? (
           <>
-            <p className="text-gray-700 mb-4">
-              Logged in as <strong>{email}</strong>
-            </p>
-
             {imageUrl ? (
               <img
                 src={imageUrl}
@@ -153,33 +177,24 @@ export default function Poo() {
                 Hello, <span className="text-blue-600">{username}</span>
               </p>
             )}
-
-            <div className="space-y-4">
-              <input
-                type="text"
-                placeholder="New username"
-                value={newUsername}
-                onChange={(e) => setNewUsername(e.target.value)}
-                disabled={uploading}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 border-black text-black"
-              />
-
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                disabled={uploading}
-                placeholder="Select a new profile image"
-                className="w-full text-black"
-              />
-
-              <button
-                onClick={handleUpdateProfile}
-                disabled={uploading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md"
-              >
-                {uploading ? "Uploading..." : "Update Profile"}
-              </button>
+            {/* 👇 Project list section */}
+            <div className="mt-8">
+              <h3 className="text-lg font-semibold mb-2 text-black">Your Projects</h3>
+              {projects.length === 0 ? (
+                <p className="text-gray-500">No projects found.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {projects.map((proj) => (
+                    <li
+                      key={proj.proid}
+                      onClick={() => navigate(`/project/${proj.proid}`)}
+                      className="cursor-pointer text-blue-700 hover:underline"
+                    >
+                      🔹 {proj.proname}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </>
         ) : (
