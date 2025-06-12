@@ -42,22 +42,22 @@ export default function Home() {
       } else {
         setTasks(tasksData || []);
       }
-
+      
       const { data: projectUser, error: projectUserError } = await supabase
-        .from("t_project_users")
-        .select("proid")
-        .eq("uid", data.user.id);
-
+      .from("t_project_users")
+      .select("proid")
+      .eq("uid", data.user.id);
+      
       if (projectUserError) {
         setError(`Даалгаврыг харуулахад алдаа гарлаа: ${projectUserError.message}`);
         return;
       }
-
+      
       const projectIds = projectUser.map((pu: any) => pu.proid);
       const { data: projectsData, error: projectsError } = await supabase
-        .from("t_project")
-        .select("proid, proname")
-        .in("proid", projectIds);
+      .from("t_project")
+      .select("proid, proname")
+      .in("proid", projectIds);
 
       if (projectsError) {
         setError(`Төслийг татахад алдаа гарлаа: ${projectsError.message}`);
@@ -65,49 +65,49 @@ export default function Home() {
         setProjects(projectsData || []);
       }
     };
-
+    
     checkUser();
   }, [navigate]);
-
+  
   const addNewProject = async () => {
     setError(null);
-
+    
     if (!newProjectName.trim()) {
       setError("Төслийн нэрийг оруулна уу.");
       return;
     }
-
+    
     try {
       const { data: insertedData, error: insertError } = await supabase
-        .from("t_project")
-        .insert([{ proname: newProjectName, proownuid: user.id }])
-        .select();
-
+      .from("t_project")
+      .insert([{ proname: newProjectName, proownuid: user.id }])
+      .select();
+      
       if (insertError) {
         setError(`Шинэ төсөл нэмэхэд алдаа гарлаа: ${insertError.message}`);
         return;
       }
-
+      
       if (!insertedData || insertedData.length === 0) {
         setError("Төсөл амжилттай нэмэгдсэн боловч өгөгдөл буцаагдсангүй.");
         return;
       }
-
+      
       const newProject = insertedData[0];
-
+      
       const { error: userLinkError } = await supabase
-        .from("t_project_users")
-        .insert([{
-          proid: newProject.proid,
-          uid: user.id,
-          share_id: Math.floor(Math.random() * 1000000),
-        }]);
-
+      .from("t_project_users")
+      .insert([{
+        proid: newProject.proid,
+        uid: user.id,
+        share_id: Math.floor(Math.random() * 1000000),
+      }]);
+      
       if (userLinkError) {
         setError(`Төсөлтэй хэрэглэгчийг холбоход алдаа гарлаа: ${userLinkError.message}`);
         return;
       }
-
+      
       setProjects([...projects, newProject]);
       setNewProjectName("");
       setShowModal(false);
@@ -115,11 +115,12 @@ export default function Home() {
       setError(`Алдаа гарлаа: ${e instanceof Error ? e.message : String(e)}`);
     }
   };
-
+  
   if (!user) {
     return <div>Ачааллаж байна...</div>;
   }
-
+  console.log("Fetched tasks:", tasks);
+  
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar компонент ашиглах */}
@@ -141,31 +142,8 @@ export default function Home() {
           {error && <p className="mb-4 text-red-500 text-center">{error}</p>}
           <h3 className="text-xl font-semibold mb-4 text-black">Таны даалгаврууд</h3>
 
-            <KanbanBoard/>
+          <KanbanBoard tasks={tasks} />
 
-          <ul className="divide-y divide-gray-200">
-            
-            {tasks.length === 0 && !error && (
-              <li className="py-2 text-center text-gray-500">Даалгавар байхгүй</li>
-            )}
-            {tasks.map((task) => (
-              <li key={task.tid} className="py-2">
-                <span className="font-semibold">{task.title}</span> -{" "}
-                <span className="text-gray-500">{task.due_date}</span> -{" "}
-                <span
-                  className={`capitalize ${
-                    task.priority === "high"
-                      ? "text-red-500"
-                      : task.priority === "medium"
-                      ? "text-yellow-500"
-                      : "text-green-500"
-                  }`}
-                >
-                  {task.priority}
-                </span>
-              </li>
-            ))}
-          </ul>
         </div>
       </div>
 
