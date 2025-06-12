@@ -7,14 +7,16 @@ export default function Register() {
   const [displayname, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [pass2, setPassword2] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleRegister = async (e: FormEvent) => {
     e.preventDefault();
-    const { error } = await supabase.auth.signUp({
+    if (pass2 == password ) {
+      const { error } = await supabase.auth.signUp({
       email,
-      password,
+        password,
       options: {
         data: {
           displayname,
@@ -27,6 +29,9 @@ export default function Register() {
       alert("Check your email to confirm registration.");
       navigate("/login");
     }
+  } else {
+    alert("both password needs to be same")
+  }
   };
 
   return (
@@ -51,6 +56,13 @@ export default function Register() {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password Again"
+          value={pass2}
+          onChange={(e) => setPassword2(e.target.value)}
           required
         />
         <button type="submit">Register</button>

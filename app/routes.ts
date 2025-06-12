@@ -7,4 +7,7 @@ export default [index("routes/home.tsx"),
 // this poo is a test profile page
     route("poo", "routes/poo.tsx"),
     route("profile", "routes/profile.tsx"),
+    route("changepass", "routes/changepass.tsx"),
+    route("forgotpass", "routes/forgot.tsx"),
+    route("update-password", "routes/updatepass.tsx"),
 ] satisfies RouteConfig;
