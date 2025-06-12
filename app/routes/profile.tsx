@@ -5,7 +5,6 @@ import { useNavigate } from "react-router";
 export default function Poo() {
   const [email, setEmail] = useState<string | null>(null);
   const [username, setUsername] = useState<string | null>(null);
-  const [newUsername, setNewUsername] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [projects, setProjects] = useState<

@@ -14,6 +14,10 @@ export const meta = ({}: Route.MetaArgs) => {
 };
 
 export default function Home() {
+  const [email, setEmail] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [tasks, setTasks] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
@@ -67,6 +71,32 @@ export default function Home() {
 
     checkUser();
   }, [navigate]);
+  useEffect(() => {
+    const getUserData = async () => {
+      const { data: authData, error: authError } =
+        await supabase.auth.getUser();
+      if (authError || !authData.user) {
+        console.error("Error getting user:", authError?.message);
+        return;
+      }
+
+      const uid = authData.user.id;
+      setEmail(authData.user.email ?? null);
+      setUserId(uid);
+
+      const { data: profileData, error: profileError } = await supabase
+        .from("t_users")
+        .select("uname, image")
+        .eq("uid", uid)
+        .single();
+
+      if (!profileError && profileData) {
+        setUsername(profileData.uname);
+        setImageUrl(profileData.image);
+      }
+    }
+    getUserData();
+  }, []);
 
   const addNewProject = async () => {
     setError(null);
@@ -134,7 +164,7 @@ export default function Home() {
         {/* Агуулга */}
         <div className="p-8">
           <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
-            Тавтай морил, {user.user_metadata?.displayname || user.email}!
+            Тавтай морил, {username}!
           </h2>
           {error && <p className="mb-4 text-red-500 text-center">{error}</p>}
           <h3 className="text-xl font-semibold mb-4">Таны даалгаврууд</h3>
