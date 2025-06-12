@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { FormEvent } from "react";
 import { supabase } from "~/supabase";
 import { useNavigate } from "react-router";
@@ -9,60 +9,81 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data: authData } = await supabase.auth.getUser();
-      if (authData.user) {
-        navigate("/profile");
-      }
-    };
-    checkUser();
-  }, [navigate]);
-
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
-    const { error } = await supabase.auth.signInWithPassword({
+    setError(null);
+
+    //email burtgl shalgh
+    const {data:userData, error: userError} = await supabase
+      .from("auth.users")
+      .select("email")
+      .eq("email", email)
+      .single();
+      if (userError && userError.code === 'PGRST116') { //pgrst116 email bhku
+        setError("Бүртгэлгүй байна");
+        return;
+      }
+
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+
     if (error) {
+      if(error.message === "Invalid login credentials") {
+        setError("Имэйл эсвэл нууц үг буруу байна");
+      }else{
       setError(error.message);
-    } else {
-      navigate("/profile");
+      }
+      return;
+    }
+
+    if (data.user) {
+      navigate("/"); // Гэрийн хуудас руу шилжих
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
-      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center text-black">Log In</h2>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Нэвтрэх</h2>
         <form onSubmit={handleLogin} className="space-y-4">
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-          />
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Имэйл</label>
+            <input
+              type="email"
+              placeholder="Имэйлээ оруулна уу"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Нууц үг</label>
+            <input
+              type="password"
+              placeholder="Нууц үгээ оруулна уу"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+            />
+          </div>
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md"
+            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200"
           >
-            Login
+            Нэвтрэх
           </button>
         </form>
-        {error && (
-          <p className="mt-4 text-center text-red-600 font-medium">{error}</p>
-        )}
+        {error && <p className="mt-4 text-red-500 text-center">{error}</p>}
+        <p className="mt-4 text-center text-gray-600">
+          Бүртгэлгүй юу?{" "}
+          <a href="/register" className="text-blue-600 hover:underline">
+            Энд дарж бүртгүүлнэ үү
+          </a>
+        </p>
       </div>
     </div>
   );
