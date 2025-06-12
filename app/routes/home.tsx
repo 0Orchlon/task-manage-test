@@ -138,8 +138,9 @@ export default function Home() {
             Тавтай морил, {user.user_metadata?.displayname || user.email}!
           </h2>
           {error && <p className="mb-4 text-red-500 text-center">{error}</p>}
-          <h3 className="text-xl font-semibold mb-4">Таны даалгаврууд</h3>
+          <h3 className="text-xl font-semibold mb-4 text-black">Таны даалгаврууд</h3>
           <ul className="divide-y divide-gray-200">
+            
             {tasks.length === 0 && !error && (
               <li className="py-2 text-center text-gray-500">Даалгавар байхгүй</li>
             )}
