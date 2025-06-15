@@ -1,61 +1,88 @@
-interface Task {
-  id: string;
+// KanbanBoard.tsx
+import React, { useState, useEffect } from 'react';
+import { supabase } from "~/supabase";
+import { useNavigate } from "react-router";
+import { DndContext } from '@dnd-kit/core';
+import Column from './column';
+
+type Task = {
+  tid: number;
   title: string;
-  status: number; // status is numeric
-}
+  due_date: string;
+  priority: string;
+  status: number;
+};
 
 interface KanbanBoardProps {
-  tasksData: Task[];
+  tasks: Task[];
 }
 
-export default function KanbanBoard({ tasksData }: KanbanBoardProps) {
-  const STATUS_MAP: Record<number, "To Do" | "In Progress" | "Done"> = {
-    0: "To Do",
-    1: "In Progress",
-    2: "Done",
-  };
+const getStatusFromId = (id: string): number => {
+  switch (id) {
+    case 'todo': return 1;
+    case 'in-progress': return 2;
+    case 'done': return 3;
+    default: return 1;
+  }
+};
 
-  const readableTasks = tasksData.map((task) => ({
-    ...task,
-    status: STATUS_MAP[task.status] || "To Do",
-  }));
+const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks }) => {
+  const [localTasks, setLocalTasks] = useState<Task[]>(tasks);
 
-  const groupedTasks = {
-    "To Do": readableTasks.filter((task) => task.status === "To Do"),
-    "In Progress": readableTasks.filter((task) => task.status === "In Progress"),
-    "Done": readableTasks.filter((task) => task.status === "Done"),
+  useEffect(() => {
+    setLocalTasks(tasks);
+  }, [tasks]);
+
+  const handleDragEnd = async (event: any) => {
+    const { active, over } = event;
+    if (!over || !active.id) return;
+
+    const newStatus = getStatusFromId(over.id);
+    const taskId = parseInt(active.id);
+
+    console.log('Moved task:', active.id, 'to column:', over.id);
+
+    setLocalTasks((prev) =>
+      prev.map((task) =>
+        task.tid.toString() === active.id
+          ? { ...task, status: getStatusFromId(over.id) }
+          : task
+      )
+    );
+
+    const { error } = await supabase
+        .from('t_tasks')                // your table name
+        .update({ status: newStatus }) // update status
+        .eq('tid', taskId);            // filter by ID
+
+    if (error) {
+        console.error('Supabase update error:', error.message);
+    }
+
+
   };
 
   return (
-    <div className="flex gap-4 p-4 overflow-auto bg-gray-100 min-h-screen">
-      {Object.entries(groupedTasks).map(([columnName, tasks]) => (
-        <div key={columnName} className="w-80 flex-shrink-0">
-          <h2
-            className={`text-lg font-bold mb-4 px-4 py-2 rounded-t-md ${
-              columnName === "To Do"
-                ? "bg-gray-200"
-                : columnName === "In Progress"
-                ? "bg-blue-200"
-                : "bg-green-200"
-            }`}
-          >
-            {columnName}
-          </h2>
-          <div className="bg-white rounded-b-md shadow-md p-2 space-y-4">
-            {tasks.map((task) => (
-              <div
-                key={task.id}
-                className="bg-gray-50 p-3 rounded-md border border-gray-200 shadow-sm"
-              >
-                <span className="text-red-800">{task.title}</span>
-              </div>
-            ))}
-            <button className="w-full text-blue-500 hover:underline text-sm mt-2">
-              + Add task
-            </button>
-          </div>
-        </div>
-      ))}
-    </div>
+    <DndContext onDragEnd={handleDragEnd}>
+      <div className="flex flex-col md:flex-row gap-4 p-6 bg-gray-100 min-h-screen">
+        <Column
+          id="todo"
+          title="To Do"
+          tasks={localTasks.filter((t) => t.status === 1)}
+        />
+        <Column
+          id="in-progress"
+          title="In Progress"
+          tasks={localTasks.filter((t) => t.status === 2)}
+        />
+        <Column
+          id="done"
+          title="Done"
+          tasks={localTasks.filter((t) => t.status === 3)}
+        />
+      </div>
+    </DndContext>
   );
-}
+};
+
+export default KanbanBoard;
