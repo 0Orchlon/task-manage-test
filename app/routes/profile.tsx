@@ -8,9 +8,14 @@ export default function Poo() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [projects, setProjects] = useState<
-    { proid: number; proname: string }[]
+  { proid: number; proname: string }[]
   >([]);
-  const navigate = useNavigate();
+  const onSelectProject = (proid: number) => {
+    console.log("Selected project ID:", proid);
+    navigate("/")
+    // Additional logic for selecting a project can go here
+  };  const navigate = useNavigate();
+
 useEffect(() => {
   const getUserData = async () => {
     const { data: authData, error: authError } = await supabase.auth.getUser();
@@ -164,7 +169,13 @@ useEffect(() => {
                   {projects.map((proj) => (
                     <li
                       key={proj.proid}
-                      onClick={() => navigate(`/project/${proj.proid}`)}
+                      
+                      onClick={() =>{
+
+                        onSelectProject(proj.proid);
+                        // navigate(`/`);
+                      }
+                      }
                       className="cursor-pointer text-blue-700 hover:underline"
                     >
                       🔹 {proj.proname}

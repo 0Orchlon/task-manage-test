@@ -18,7 +18,7 @@ interface Task {
 interface SidebarProps {
   projects?: Project[];
   tasks?: Task[];
-  onSelectProject: (projectId: string) => void; // <-- Fix type
+  onSelectProject: (proid: number) => void; // <-- Fix type
   onNewProject: () => void;
   onDeleteProject: (proid: number) => void;
   onTaskClick?: (taskId: number) => void;
