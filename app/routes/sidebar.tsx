@@ -18,6 +18,7 @@ interface Task {
 interface SidebarProps {
   projects?: Project[];
   tasks?: Task[];
+  onSelectProject: (projectId: string) => void; // <-- Fix type
   onNewProject: () => void;
   onDeleteProject: (proid: number) => void;
   onTaskClick?: (taskId: number) => void;
@@ -27,6 +28,7 @@ interface SidebarProps {
 export default function Sidebar({
   projects = [],
   tasks = [],
+  onSelectProject,
   onNewProject,
   onDeleteProject,
   onTaskClick,
@@ -176,9 +178,8 @@ export default function Sidebar({
             <div className="flex items-center justify-between cursor-pointer">
               <div
                 className="flex items-center cursor-pointer"
-                onClick={() =>
-                  setOpenProject(openProject === project.proid ? null : project.proid)
-                }
+                onClick={() => onSelectProject(project.proid)}
+
               >
                 <span className="mr-2">
                   {openProject === project.proid ? "📂" : "📁"}
