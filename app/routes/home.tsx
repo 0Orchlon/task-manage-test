@@ -149,19 +149,11 @@ export default function Home() {
 
           <h3 className="text-xl font-semibold mb-4 text-black">Таны даалгаврууд</h3>
 
-          {/* ✅ Map status numbers to strings */}
-          <KanbanBoard
-            tasksData={tasks.map((task) => ({
-              ...task,
-              status:
-                task.status === 0
-                  ? "To Do"
-                  : task.status === 2
-                  ? "In Progress"
-                  : "Done",
-            }))}
-          />
+          {/* ✅ Map s  tatus numbers to strings */}
+          <KanbanBoard tasks={tasks} />
 
+          {/* This shows the tasks as a list */}
+{/* 
           <ul className="divide-y divide-gray-200 mt-6">
             {tasks.length === 0 && !error && (
               <li className="py-2 text-center text-gray-500">Даалгавар байхгүй</li>
@@ -183,7 +175,7 @@ export default function Home() {
                 </span>
               </li>
             ))}
-          </ul>
+          </ul> */}
         </div>
       </div>
 
