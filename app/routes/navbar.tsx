@@ -1,6 +1,7 @@
 import { supabase } from "~/supabase";
 import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
+import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 
 interface NavbarProps {
   user: any;
@@ -11,8 +12,10 @@ export default function Navbar({ user }: NavbarProps) {
   const [username, setUsername] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const navigate = useNavigate();
+
   useEffect(() => {
     const getUserData = async () => {
       const { data: authData, error: authError } =
@@ -45,7 +48,6 @@ export default function Navbar({ user }: NavbarProps) {
     navigate("/login");
   };
 
-  // Ehnii useg avah
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -58,39 +60,49 @@ export default function Navbar({ user }: NavbarProps) {
   const displayName = username || user?.email || "User";
 
   return (
-    <nav className="bg-white shadow-md p-4 flex justify-between items-center">
+    <nav className="bg-white shadow-md p-4 flex justify-between items-center relative">
       <h1 className="text-xl font-bold text-black">Даалгаврын Удирдлага</h1>
 
-      <div className="flex items-center space-x-4">
+      <div className="relative">
         <button
-        onClick={()=>navigate("/profile")}
+          onClick={() => setDropdownOpen((prev) => !prev)}
+          className="flex items-center space-x-2 bg-gray-200 rounded-full px-2 py-1 focus:outline-none"
         >
-          
-        {imageUrl ? (
-          <div className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-semibold">
+          {imageUrl ? (
             <img
               src={imageUrl}
               alt="Profile"
-              className="w-10 h-10 rounded-full mx-auto mb-4 object-cover border mt-4"
+              className="w-10 h-10 rounded-full object-cover border border-white"
             />
-          </div>
-        ) : (
-          <div className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-semibold">
-            <>
-            {getInitials(displayName)}
-            </>
+          ) : (
+            <div className="w-10 h-10 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
+              {getInitials(displayName)}
+            </div>
+          )}
+          <span className="text-gray-700 text-lg">
+            {dropdownOpen ? <FaChevronUp /> : <FaChevronDown />}
+          </span>
+        </button>
+
+        {dropdownOpen && (
+          <div className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-md z-10">
+            <button
+              onClick={() => {
+                setDropdownOpen(false);
+                navigate("/profile");
+              }}
+              className="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-200 rounded-lg"
+            >
+              Профайл
+            </button>
+            <button
+              onClick={handleLogout}
+              className="block w-full px-4 py-2 text-left text-red-600 hover:bg-gray-100"
+            >
+              Гарах
+            </button>
           </div>
         )}
-
-        {/* hereglegch name */}
-        <span className="text-gray-700 font-medium">{username}</span>
-        </button>
-        <button
-          onClick={handleLogout}
-          className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200"
-        >
-          Гарах
-        </button>
       </div>
     </nav>
   );

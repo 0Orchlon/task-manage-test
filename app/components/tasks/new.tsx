@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { useNavigate, useLocation } from "react-router";
+// NewTask.tsx
+import React, { useState } from "react";
 import { supabase } from "~/supabase";
+import { useNavigate, useLocation } from "react-router";
 
 export default function NewTask() {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ export default function NewTask() {
         description,
         due_date: dueDate,
         priority,
-        status: 0,
+        status: 1, // default to 'To Do' column
         proid,
         creatoruid: userData.user.id,
       },
@@ -39,14 +40,16 @@ export default function NewTask() {
     if (error) {
       setError(error.message);
     } else {
-      navigate(-1); // Go back to previous page
+      navigate("/");
     }
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Шинэ даалгавар нэмэх</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
+          Шинэ даалгавар нэмэх
+        </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
@@ -73,9 +76,9 @@ export default function NewTask() {
             onChange={(e) => setPriority(e.target.value)}
             className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
           >
-            <option value="low">low</option>
-            <option value="medium">medium</option>
-            <option value="high">high</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
           </select>
           <button
             type="submit"
