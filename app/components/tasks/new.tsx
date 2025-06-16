@@ -31,7 +31,7 @@ export default function NewTask() {
         description,
         due_date: dueDate,
         priority,
-        status: 1, // default to 'To Do' column
+        status: 1,
         proid,
         creatoruid: userData.user.id,
       },
@@ -40,7 +40,7 @@ export default function NewTask() {
     if (error) {
       setError(error.message);
     } else {
-      navigate("/");
+      navigate(-1); // butsah
     }
   };
 
@@ -85,6 +85,12 @@ export default function NewTask() {
             className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200"
           >
             Нэмэх
+          </button>
+          <button
+            className="w-full bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700 transition duration-200"
+            onClick={() => navigate(-1)}
+          >
+            Буцах
           </button>
         </form>
         {error && <p className="mt-4 text-red-500 text-center">{error}</p>}

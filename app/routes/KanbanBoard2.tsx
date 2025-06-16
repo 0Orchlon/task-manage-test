@@ -1,8 +1,9 @@
 // KanbanBoard.tsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import { supabase } from "~/supabase";
-import { DndContext } from "@dnd-kit/core";
-import Column from "./column";
+import { useNavigate } from "react-router";
+import { DndContext } from '@dnd-kit/core';
+import Column from './column';
 
 type Task = {
   tid: number;
@@ -13,35 +14,24 @@ type Task = {
 };
 
 interface KanbanBoardProps {
-  tasks?: Task[];
+  tasks: Task[];
 }
 
-const STATUS_MAP: Record<number, "To Do" | "In Progress" | "Done"> = {
-  1: "To Do",
-  2: "In Progress",
-  3: "Done",
+const getStatusFromId = (id: string): number => {
+  switch (id) {
+    case 'todo': return 1;
+    case 'in-progress': return 2;
+    case 'done': return 3;
+    default: return 1;
+  }
 };
 
-const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks = [] }) => {
+const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks }) => {
   const [localTasks, setLocalTasks] = useState<Task[]>(tasks);
 
   useEffect(() => {
-    console.log("Incoming tasks:", tasks);
     setLocalTasks(tasks);
   }, [tasks]);
-
-  const getStatusFromId = (id: string): number => {
-    switch (id) {
-      case "todo":
-        return 1;
-      case "in-progress":
-        return 2;
-      case "done":
-        return 3;
-      default:
-        return 0;
-    }
-  };
 
   const handleDragEnd = async (event: any) => {
     const { active, over } = event;
@@ -50,27 +40,27 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks = [] }) => {
     const newStatus = getStatusFromId(over.id);
     const taskId = parseInt(active.id);
 
-    console.log("Moved task:", active.id, "to column:", over.id);
+    console.log('Moved task:', active.id, 'to column:', over.id);
 
     setLocalTasks((prev) =>
       prev.map((task) =>
         task.tid.toString() === active.id
-          ? { ...task, status: newStatus }
+          ? { ...task, status: getStatusFromId(over.id) }
           : task
       )
     );
 
     const { error } = await supabase
-      .from("t_tasks")
-      .update({ status: newStatus })
-      .eq("tid", taskId);
+        .from('t_tasks')                // your table name
+        .update({ status: newStatus }) // update status
+        .eq('tid', taskId);            // filter by ID
 
     if (error) {
-      console.error("Supabase update error:", error.message);
+        console.error('Supabase update error:', error.message);
     }
-  };
 
-  const addNewTask = () => {};
+
+  };
 
   return (
     <DndContext onDragEnd={handleDragEnd}>
@@ -79,19 +69,16 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks = [] }) => {
           id="todo"
           title="To Do"
           tasks={localTasks.filter((t) => t.status === 1)}
-          onAddTask={addNewTask}
         />
         <Column
           id="in-progress"
           title="In Progress"
           tasks={localTasks.filter((t) => t.status === 2)}
-          onAddTask={addNewTask}
         />
         <Column
           id="done"
           title="Done"
           tasks={localTasks.filter((t) => t.status === 3)}
-          onAddTask={addNewTask}
         />
       </div>
     </DndContext>
