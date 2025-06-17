@@ -27,7 +27,7 @@ export default function Home() {
     if (selectedProjId) {
       const { data: tasksData, error: tasksError } = await supabase
         .from("t_tasks")
-        .select("tid, title, status, due_date, priority")
+        .select("tid, title, description, status, due_date, priority")
         .eq("proid", selectedProjId);
 
       if (tasksError) {
@@ -139,15 +139,17 @@ export default function Home() {
         onSelectProject={(projectId) => setSelProject(projectId)}
       />
 
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-auto">
         <Navbar user={user} />
-        <div className="p-8">
+        <div className="p-8 flex-1 overflow-auto">
           <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
             Тавтай морил, {user.user_metadata?.displayname || user.email}!
           </h2>
           {error && <p className="mb-4 text-red-500 text-center">{error}</p>}
 
           <h3 className="text-xl font-semibold mb-4 text-black">Таны даалгаврууд</h3>
+
+          
 
           {/* ✅ Map s  tatus numbers to strings */}
           <KanbanBoard tasks={tasks} />
