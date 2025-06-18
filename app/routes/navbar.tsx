@@ -2,6 +2,7 @@ import { supabase } from "~/supabase";
 import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { SearchOutlined } from "@ant-design/icons";
 
 interface NavbarProps {
   user: any;
@@ -40,8 +41,22 @@ export default function Navbar({ user }: NavbarProps) {
         setImageUrl(profileData.image);
       }
     };
+
     getUserData();
-  }, []);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownOpen &&
+        event.target &&
+        !(event.target as Element).closest(".navbar-dropdown")
+      ) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, [dropdownOpen]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -62,7 +77,6 @@ export default function Navbar({ user }: NavbarProps) {
   return (
     <nav className="bg-white shadow-md p-4 flex justify-between items-center relative">
       <h1 className="text-xl font-bold text-black">Даалгаврын Удирдлага</h1>
-
       <div className="relative">
         <button
           onClick={() => setDropdownOpen((prev) => !prev)}
@@ -91,7 +105,7 @@ export default function Navbar({ user }: NavbarProps) {
                 setDropdownOpen(false);
                 navigate("/profile");
               }}
-              className="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-200 rounded-lg"
+              className="block w-full px-4 py-2 text-left text-gray-600 hover:bg-gray-100"
             >
               Профайл
             </button>

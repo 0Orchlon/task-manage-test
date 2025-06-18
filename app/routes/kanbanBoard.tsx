@@ -8,7 +8,7 @@ type Task = {
   tid: number;
   title: string;
   due_date: string;
-  priority: string;
+  priority: "high" | "medium" | "low";
   status: number;
 };
 
@@ -30,6 +30,21 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks = [] }) => {
     setLocalTasks(tasks);
   }, [tasks]);
 
+  const handleEdit = (updatedTask: Task) => {
+    setLocalTasks((prev) =>
+      prev.map((t) => (t.tid === updatedTask.tid ? updatedTask : t))
+    );
+  };
+
+  const handleDelete = async (tid: number | string) => {
+    const taskId = typeof tid === "string" ? parseInt(tid) : tid;
+    const { error } = await supabase.from("t_tasks").delete().eq("tid", taskId);
+    if (error) {
+      alert("Устгах үед алдаа гарлаа: " + error.message);
+      return;
+    }
+    setLocalTasks((prev) => prev.filter((t) => t.tid !== taskId));
+  };
   const getStatusFromId = (id: string): number => {
     switch (id) {
       case "todo":
@@ -79,19 +94,22 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks = [] }) => {
           id="todo"
           title="To Do"
           tasks={localTasks.filter((t) => t.status === 1)}
-          onAddTask={addNewTask}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
         />
         <Column
           id="in-progress"
           title="In Progress"
           tasks={localTasks.filter((t) => t.status === 2)}
-          onAddTask={addNewTask}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
         />
         <Column
           id="done"
           title="Done"
           tasks={localTasks.filter((t) => t.status === 3)}
-          onAddTask={addNewTask}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
         />
       </div>
     </DndContext>

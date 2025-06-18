@@ -6,7 +6,7 @@ type TaskType = {
   tid: number;
   title: string;
   due_date: string;
-  priority: string;
+  priority: "high" | "medium" | "low";
   status: number;
 };
 
@@ -14,17 +14,18 @@ interface ColumnProps {
   id: string;
   title: string;
   tasks: TaskType[];
-  onAddTask: (status: number) => void; // <-- add this
+  onEdit: (updatedTask: TaskType) => void;
+  onDelete: (tid: number | string) => void;
 }
 
-export default function Column({ id, title, tasks, onAddTask }: ColumnProps) {
+export default function Column({
+  id,
+  title,
+  tasks,
+  onEdit,
+  onDelete,
+}: ColumnProps) {
   const { isOver, setNodeRef } = useDroppable({ id });
-
-  const statusMap: Record<string, number> = {
-    todo: 1,
-    "in-progress": 2,
-    done: 3,
-  };
 
   return (
     <div
@@ -37,15 +38,15 @@ export default function Column({ id, title, tasks, onAddTask }: ColumnProps) {
       {tasks.length === 0 ? (
         <p className="text-sm text-gray-400">No tasks here.</p>
       ) : (
-        tasks.map((task) => <Task key={task.tid} task={task} />)
+        tasks.map((task) => (
+          <Task
+            key={task.tid}
+            task={task}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+        ))
       )}
-
-      <button
-        onClick={() => onAddTask(statusMap[id])}
-        className="mt-4 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
-      >
-        + Add Task
-      </button>
     </div>
   );
 }
