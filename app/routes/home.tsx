@@ -26,17 +26,19 @@ export default function Home() {
   const [showModal, setShowModal] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const navigate = useNavigate();
-  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
-    const [selectedProjId, setSelProject] = useState<string>("");
+  // const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
+    // const [selectedProjId, setSelProject] = useState<string>("");
+    const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
+
 
     const getTasks = async () => {
-    if (selectedProjId) {
+    if (selectedProjectId) {
       const { data: tasksData, error: tasksError } = await supabase
         .from("t_tasks")
         .select("tid, title, status, due_date, priority")
-        .eq("proid", selectedProjId);
+        .eq("proid", selectedProjectId);
 
-      if (tasksError) {
+    if (tasksError) {
         setError(`Даалгавруудыг татахад алдаа гарлаа: ${tasksError.message}`);
       } else {
         setTasks(tasksData);
@@ -60,16 +62,16 @@ export default function Home() {
       //   .select("proid")
       //   .eq("uid", data.user.id);
 
-      const { data: tasksData, error: tasksError } = await supabase
-        .from("t_tasks")
-        .select("tid, title, due_date, priority, status")
-        .eq("creatoruid", data.user.id);
+      // const { data: tasksData, error: tasksError } = await supabase
+      //   .from("t_tasks")
+      //   .select("tid, title, due_date, priority, status")
+      //   .eq("creatoruid", data.user.id);
 
-      if (tasksError) {
-        setError(`Даалгавруудыг татахад алдаа гарлаа: ${tasksError.message}`);
-      } else {
-        setTasks(tasksData || []);
-      }
+      // if (tasksError) {
+      //   setError(`Даалгавруудыг татахад алдаа гарлаа: ${tasksError.message}`);
+      // } else {
+      //   setTasks(tasksData || []);
+      // }
       
       const { data: projectUser, error: projectUserError } = await supabase
       .from("t_project_users")
@@ -96,7 +98,7 @@ export default function Home() {
      getTasks();
 
     checkUser();
-  }, [navigate,selectedProjId]);
+  }, [navigate,selectedProjectId]);
   
   const addNewProject = async () => {
     setError(null);
@@ -140,7 +142,7 @@ export default function Home() {
       setProjects([...projects, newProject]);
       setNewProjectName("");
       setShowModal(false);
-      setSelProject(newProject.proid);
+      // setSelProject(newProject.proid);
     } catch (e) {
       setError(`Алдаа гарлаа: ${e instanceof Error ? e.message : String(e)}`);
     }
@@ -192,11 +194,10 @@ export default function Home() {
       <Sidebar
         projects={projects || []}
         tasks={tasks}
-        onSelectProject={(projectId) => setSelProject(projectId)}
+      onSelectProject={(projectId) => setSelectedProjectId(projectId)}
         onNewProject={() => setShowModal(true)}
         onDeleteProject={handleDeleteProject}
-        selectedProjectId={selectedProjectId}
-// onSelectProject={(projectId) => setProjects(projectId)}
+        // setSelectedProjectId={selectedProjId}
 />
 
       {/* Үндсэн агуулга */}
@@ -212,9 +213,10 @@ export default function Home() {
           {error && <p className="mb-4 text-red-500 text-center">{error}</p>}
           <h3 className="text-xl font-semibold mb-4 text-black">Таны даалгаврууд</h3>
 
-          <KanbanBoard 
+          {/* <KanbanBoard 
             tasks={tasks}
-            />
+            /> */}
+{selectedProjectId && <KanbanBoard tasks={tasks} />}
 
         </div>
       </div>

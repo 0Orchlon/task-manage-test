@@ -9,7 +9,7 @@ interface Task {
   tid: number;
   title: string;
   due_date: string;
-  priority: "high" | "medium" | "low";
+  priority: string;
   status: number;
 }
 
