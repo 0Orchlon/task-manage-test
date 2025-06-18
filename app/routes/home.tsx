@@ -32,7 +32,7 @@ export default function Home() {
     if (selectedProjectId) {
       const { data: tasksData, error: tasksError } = await supabase
         .from("t_tasks")
-        .select("tid, title, status, due_date, priority")
+        .select("tid, title, description, status, due_date, priority")
         .eq("proid", selectedProjectId);
 
       if (tasksError) {

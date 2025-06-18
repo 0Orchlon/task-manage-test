@@ -9,6 +9,7 @@ import { supabase } from "~/supabase";
 interface Task {
   tid: number;
   title: string;
+  description: string;
   due_date: string;
   priority: string;
   status: number;
@@ -63,7 +64,7 @@ export default function Task({ task, onEdit, onDelete }: TaskProps) {
     e.preventDefault();
     const updatedTask = {
       ...editForm,
-      status: task.status, // keep current status
+      status: task.status,
     };
 
     const { error } = await supabase
@@ -86,7 +87,6 @@ export default function Task({ task, onEdit, onDelete }: TaskProps) {
       style={style}
       className="relative bg-white border border-gray-200 rounded-lg p-4 mb-3 shadow-sm hover:shadow-md transition-shadow text-black"
     >
-      {/* Header with Dropdown + Drag */}
       <div className="flex justify-between items-center text-gray-500 text-sm mb-1">
         <span></span>
         <div className="flex items-center space-x-1">
@@ -108,7 +108,6 @@ export default function Task({ task, onEdit, onDelete }: TaskProps) {
         </div>
       </div>
 
-      {/* Dropdown Menu */}
       {openDropdown && (
         <div className="dropdown-menu absolute right-2 top-10 w-40 bg-white border rounded-md shadow-md z-10">
           <button
@@ -147,6 +146,18 @@ export default function Task({ task, onEdit, onDelete }: TaskProps) {
                   value={editForm.title}
                   onChange={(e) =>
                     setEditForm({ ...editForm, title: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border rounded-md"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm mb-1">Description</label>
+                <input
+                  type="text"
+                  value={editForm.description}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, description: e.target.value })
                   }
                   className="w-full px-3 py-2 border rounded-md"
                   required
@@ -201,10 +212,10 @@ export default function Task({ task, onEdit, onDelete }: TaskProps) {
         </div>
       )}
 
-      {/* Task Content */}
       <div className="font-semibold text-gray-800 text-md mb-1">
         {task.title}
       </div>
+      <div className="text-sm text-gray-600">📝 Description: {task.description ? task.description : 'no description' } </div>
       <div className="text-sm text-gray-600">📅 Due: {task.due_date}</div>
       <div className="text-sm text-gray-600 mt-1">
         ⚡ Priority:{" "}

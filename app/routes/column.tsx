@@ -6,6 +6,7 @@ import Task from "./Task";
 type TaskType = {
   tid: number;
   title: string;
+  description: string;
   due_date: string;
   priority: "high" | "medium" | "low";
   status: number;

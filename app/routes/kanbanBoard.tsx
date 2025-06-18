@@ -7,6 +7,7 @@ import Column from './column';
 type Task = {
   tid: number;
   title: string;
+  description: string;
   due_date: string;
   priority: string;
   status: number;
@@ -20,6 +21,7 @@ const STATUS_MAP: Record<number, "To Do" | "In Progress" | "Done"> = {
 
 const KanbanBoard: React.FC<{ tasks?: Task[] }> = ({ tasks = [] }) => {
   const [localTasks, setLocalTasks] = useState<Task[]>(tasks);
+  const [sortBy, setSortBy] = useState<'due_date' | 'priority' | 'title'>('due_date');
 
   useEffect(() => {
     setLocalTasks(tasks);
@@ -32,6 +34,19 @@ const KanbanBoard: React.FC<{ tasks?: Task[] }> = ({ tasks = [] }) => {
       case 'done': return 3;
       default: return 0;
     }
+  };
+
+  const sortTasks = (tasks: Task[]) => {
+    return [...tasks].sort((a, b) => {
+      if (sortBy === 'due_date') {
+        return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+      } else if (sortBy === 'priority') {
+        const priorityMap = { low: 3, medium: 2, high: 1 };
+        return priorityMap[a.priority] - priorityMap[b.priority];
+      } else {
+        return a.title.localeCompare(b.title);
+      }
+    });
   };
 
   const handleDragEnd = async (event: any) => {
@@ -94,23 +109,38 @@ const KanbanBoard: React.FC<{ tasks?: Task[] }> = ({ tasks = [] }) => {
 
   return (
     <DndContext onDragEnd={handleDragEnd}>
-      <div className="flex flex-col md:flex-row gap-4 p-6 bg-gray-100 min-h-screen">
-        {Object.entries(STATUS_MAP).map(([statusId, title]) => (
-          <Column
-            key={statusId}
-            id={
-              statusId === "1"
-                ? "todo"
-                : statusId === "2"
-                ? "in-progress"
-                : "done"
-            }
-            title={title}
-            tasks={localTasks.filter((t) => t.status === parseInt(statusId))}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        ))}
+      <div className="bg-gray-100 min-h-screen p-4">
+        <div className="flex items-center gap-2 mb-4">
+          <label className="text-sm font-medium text-gray-700">Sort by:</label>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as any)}
+            className="text-sm border rounded px-2 py-1 bg-white text-black"
+          >
+            <option value="due_date">Due Date</option>
+            <option value="priority">Priority</option>
+            <option value="title">Title</option>
+          </select>
+        </div>
+
+        <div className="flex flex-col md:flex-row gap-4 p-6 bg-gray-100 min-h-screen">
+          {Object.entries(STATUS_MAP).map(([statusId, title]) => (
+            <Column
+              key={statusId}
+              id={
+                statusId === "1"
+                  ? "todo"
+                  : statusId === "2"
+                  ? "in-progress"
+                  : "done"
+              }
+              title={title}
+              tasks={sortTasks(localTasks.filter((t) => t.status === parseInt(statusId)))}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          ))}
+        </div>
       </div>
     </DndContext>
   );
