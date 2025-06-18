@@ -10,11 +10,13 @@ type ReminderTask = {
   proid: number;
 };
 
-interface ReminderProps {
-  onSelectProject: (proid: number) => void;
-}
+// interface ReminderProps {
+//   projects: Project[];
+//   selectedProjectId: number | null;
+//   setSelectedProjectId: (id: number) => void;
+// }
 
-export default function Reminder({ onSelectProject }: ReminderProps) {
+export default function Reminder() {
   const [tasks, setTasks] = useState<ReminderTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [overduePage, setOverduePage] = useState(0);
@@ -121,7 +123,7 @@ export default function Reminder({ onSelectProject }: ReminderProps) {
                 {paginatedOverdue.map((t) => (
                   <li
                     key={t.tid}
-                    onClick={() => onSelectProject(t.proid)}
+                    // onClick={() => setSelectedProjectId(project.proid)}
                     className="bg-red-700 p-2 rounded-md cursor-pointer hover:bg-red-600 transition"
                   >
                     <strong>{t.title}</strong>
@@ -160,7 +162,7 @@ export default function Reminder({ onSelectProject }: ReminderProps) {
                 {paginatedUpcoming.map((t) => (
                   <li
                     key={t.tid}
-                    onClick={() => onSelectProject(t.proid)}
+                    // onClick={() => setSelectedProjectId(projects.proid)}
                     className="bg-blue-700 p-2 rounded-md cursor-pointer hover:bg-blue-600 transition"
                   >
                     <strong>{t.title}</strong>

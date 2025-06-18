@@ -4,7 +4,7 @@ import { useNavigate } from "react-router";
 import type { Route } from "./+types/home";
 import Sidebar from "./sidebar";
 import Navbar from "./navbar";
-import KanbanBoard from "./KanbanBoard";
+import KanbanBoard from "./kanbanBoard";
 
 interface Project {
   proid: number;
@@ -26,8 +26,28 @@ export default function Home() {
   const [showModal, setShowModal] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const navigate = useNavigate();
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
+    const [selectedProjId, setSelProject] = useState<string>("");
+
+    const getTasks = async () => {
+    if (selectedProjId) {
+      const { data: tasksData, error: tasksError } = await supabase
+        .from("t_tasks")
+        .select("tid, title, status, due_date, priority")
+        .eq("proid", selectedProjId);
+
+      if (tasksError) {
+        setError(`Даалгавруудыг татахад алдаа гарлаа: ${tasksError.message}`);
+      } else {
+        setTasks(tasksData);
+      }
+    } else {
+      setTasks([]);
+    }
+  };
 
   useEffect(() => {
+    
     const checkUser = async () => {
       const { data, error } = await supabase.auth.getUser();
       if (error || !data.user) {
@@ -35,6 +55,10 @@ export default function Home() {
         return;
       }
       setUser(data.user);
+      // const { data: projectUser, error: projectUserError } = await supabase
+      //   .from("t_project_users")
+      //   .select("proid")
+      //   .eq("uid", data.user.id);
 
       const { data: tasksData, error: tasksError } = await supabase
         .from("t_tasks")
@@ -69,9 +93,10 @@ export default function Home() {
         setProjects(projectsData || []);
       }
     };
-    
+     getTasks();
+
     checkUser();
-  }, [navigate]);
+  }, [navigate,selectedProjId]);
   
   const addNewProject = async () => {
     setError(null);
@@ -115,6 +140,7 @@ export default function Home() {
       setProjects([...projects, newProject]);
       setNewProjectName("");
       setShowModal(false);
+      setSelProject(newProject.proid);
     } catch (e) {
       setError(`Алдаа гарлаа: ${e instanceof Error ? e.message : String(e)}`);
     }
@@ -164,9 +190,14 @@ export default function Home() {
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar компонент ашиглах */}
       <Sidebar
-        projects={projects}
+        projects={projects || []}
         tasks={tasks}
-        onNewProject={() => setShowModal(true)} onDeleteProject={handleDeleteProject}      />
+        onSelectProject={(projectId) => setSelProject(projectId)}
+        onNewProject={() => setShowModal(true)}
+        onDeleteProject={handleDeleteProject}
+        selectedProjectId={selectedProjectId}
+// onSelectProject={(projectId) => setProjects(projectId)}
+/>
 
       {/* Үндсэн агуулга */}
       <div className="flex-1 flex flex-col">
@@ -181,7 +212,9 @@ export default function Home() {
           {error && <p className="mb-4 text-red-500 text-center">{error}</p>}
           <h3 className="text-xl font-semibold mb-4 text-black">Таны даалгаврууд</h3>
 
-          <KanbanBoard tasks={tasks} />
+          <KanbanBoard 
+            tasks={tasks}
+            />
 
         </div>
       </div>

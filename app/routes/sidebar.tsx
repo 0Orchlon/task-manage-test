@@ -31,6 +31,9 @@ interface SidebarProps {
   onDeleteProject: (proid: number) => void;
   onTaskClick?: (taskId: number) => void;
   onProjectRename?: (proid: number, newName: string) => void;
+  setSelectedProjectId: (id: number) => void;
+  selectedProjectId: number | null;
+
 }
 
 export default function Sidebar({
@@ -55,8 +58,10 @@ export default function Sidebar({
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+if (Array.isArray(projects)) {
     setLocalProjects(projects);
-  }, [projects]);
+  }
+}, [projects]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -196,7 +201,8 @@ export default function Sidebar({
   return (
     <aside ref={sidebarRef} className="w-64 bg-gray-800 text-white p-4 flex flex-col relative">
       <h2 className="text-lg font-semibold mb-4">МЭДЭЭЛЭЛ</h2>
-<Reminder onSelectProject={onSelectProject}/>
+<Reminder 
+/>
 
       <h2 className="text-lg font-semibold mt-6 mb-4">Projects</h2>
       <ul className="space-y-2">
@@ -242,11 +248,11 @@ export default function Sidebar({
             </div>
             {openProject === project.proid && (
               <div className="ml-6 mt-2">
-                <Tasks
+                {/* <Tasks
                   tasks={tasks.filter((task) => task.proid === project.proid)}
                   proid={project.proid}
                   onTaskClick={onTaskClick}
-                />
+                /> */}
                 <h4 className="text-sm font-medium mt-2">Багийн гишүүд:</h4>
                 <ul className="mt-1 space-y-1">
                   {projectUsers[project.proid]?.length > 0 ? (
