@@ -1,3 +1,4 @@
+// column.tsx
 import React from "react";
 import { useDroppable } from "@dnd-kit/core";
 import Task from "./Task";

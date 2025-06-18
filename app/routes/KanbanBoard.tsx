@@ -1,7 +1,6 @@
-// KanbanBoard.tsx
+// kanbanBoard.tsx
 import React, { useState, useEffect } from 'react';
 import { supabase } from "~/supabase";
-import { useNavigate } from "react-router";
 import { DndContext } from '@dnd-kit/core';
 import Column from './column';
 
@@ -13,21 +12,16 @@ type Task = {
   status: number;
 };
 
-interface KanbanBoardProps {
-  tasks?: Task[];
-}
-
 const STATUS_MAP: Record<number, "To Do" | "In Progress" | "Done"> = {
   1: "To Do",
   2: "In Progress",
   3: "Done",
 };
 
-const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks = [] }) => {
+const KanbanBoard: React.FC<{ tasks?: Task[] }> = ({ tasks = [] }) => {
   const [localTasks, setLocalTasks] = useState<Task[]>(tasks);
 
   useEffect(() => {
-    console.log("Incoming tasks:", tasks);
     setLocalTasks(tasks);
   }, [tasks]);
 
@@ -47,11 +41,9 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks = [] }) => {
     const newStatus = getStatusFromId(over.id);
     const taskId = parseInt(active.id);
 
-    console.log('Moved task:', active.id, 'to column:', over.id);
-
     setLocalTasks((prev) =>
       prev.map((task) =>
-        task.tid.toString() === active.id
+        task.tid === taskId
           ? { ...task, status: newStatus }
           : task
       )
@@ -67,24 +59,58 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks = [] }) => {
     }
   };
 
+  const handleEdit = async (updatedTask: Task) => {
+    setLocalTasks((prev) =>
+      prev.map((task) => (task.tid === updatedTask.tid ? updatedTask : task))
+    );
+
+    const { error } = await supabase
+      .from('t_tasks')
+      .update({
+        title: updatedTask.title,
+        due_date: updatedTask.due_date,
+        priority: updatedTask.priority,
+        status: updatedTask.status,
+      })
+      .eq('tid', updatedTask.tid);
+
+    if (error) {
+      console.error('Supabase update error:', error.message);
+    }
+  };
+
+  const handleDelete = async (tid: number) => {
+    setLocalTasks((prev) => prev.filter((task) => task.tid !== tid));
+
+    const { error } = await supabase
+      .from('t_tasks')
+      .delete()
+      .eq('tid', tid);
+
+    if (error) {
+      console.error('Supabase delete error:', error.message);
+    }
+  };
+
   return (
     <DndContext onDragEnd={handleDragEnd}>
       <div className="flex flex-col md:flex-row gap-4 p-6 bg-gray-100 min-h-screen">
-        <Column
-          id="todo"
-          title="To Do"
-          tasks={localTasks.filter((t) => t.status === 1)}
-        />
-        <Column
-          id="in-progress"
-          title="In Progress"
-          tasks={localTasks.filter((t) => t.status === 2)}
-        />
-        <Column
-          id="done"
-          title="Done"
-          tasks={localTasks.filter((t) => t.status === 3)}
-        />
+        {Object.entries(STATUS_MAP).map(([statusId, title]) => (
+          <Column
+            key={statusId}
+            id={
+              statusId === "1"
+                ? "todo"
+                : statusId === "2"
+                ? "in-progress"
+                : "done"
+            }
+            title={title}
+            tasks={localTasks.filter((t) => t.status === parseInt(statusId))}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        ))}
       </div>
     </DndContext>
   );

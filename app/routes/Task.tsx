@@ -1,3 +1,4 @@
+// Task.tsx
 import React, { useEffect, useState } from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
@@ -54,50 +55,39 @@ export default function Task({ task, onEdit, onDelete }: TaskProps) {
         setOpenDropdown(false);
       }
     };
-
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, [openDropdown]);
 
   const handleEditSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const updatedTask = {
-        tid: task.tid,
-        title: editForm.title,
-        due_date: editForm.due_date,
-        priority: editForm.priority,
-        status: task.status, // Preserve status
-      };
+    const updatedTask = {
+      ...editForm,
+      status: task.status, // keep current status
+    };
 
-      const { error } = await supabase
-        .from("t_tasks")
-        .update(updatedTask)
-        .eq("tid", task.tid);
+    const { error } = await supabase
+      .from("t_tasks")
+      .update(updatedTask)
+      .eq("tid", task.tid);
 
-      if (error) {
-        alert("Update error: " + error.message);
-        return;
-      }
-
-      onEdit(updatedTask);
-      setIsEditing(false);
-      alert("Амжилттай шинэчлэгдлээ!");
-    } catch (error) {
-      alert("Unexpected error");
+    if (error) {
+      alert("Update error: " + error.message);
+      return;
     }
+
+    onEdit(updatedTask);
+    setIsEditing(false);
+    alert("Амжилттай шинэчлэгдлээ!");
   };
 
   return (
     <div
-
       style={style}
       className="relative bg-white border border-gray-200 rounded-lg p-4 mb-3 shadow-sm hover:shadow-md transition-shadow text-black"
     >
-      <div 
-
-      className="flex justify-between items-center text-gray-500 text-sm mb-1"
-      >
+      {/* Header with Dropdown + Drag */}
+      <div className="flex justify-between items-center text-gray-500 text-sm mb-1">
         <span></span>
         <div className="flex items-center space-x-1">
           <button
@@ -118,6 +108,7 @@ export default function Task({ task, onEdit, onDelete }: TaskProps) {
         </div>
       </div>
 
+      {/* Dropdown Menu */}
       {openDropdown && (
         <div className="dropdown-menu absolute right-2 top-10 w-40 bg-white border rounded-md shadow-md z-10">
           <button
@@ -143,6 +134,7 @@ export default function Task({ task, onEdit, onDelete }: TaskProps) {
         </div>
       )}
 
+      {/* Modal Edit Form */}
       {isEditing && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-96">
@@ -209,6 +201,7 @@ export default function Task({ task, onEdit, onDelete }: TaskProps) {
         </div>
       )}
 
+      {/* Task Content */}
       <div className="font-semibold text-gray-800 text-md mb-1">
         {task.title}
       </div>
