@@ -93,7 +93,7 @@ export default function Task({ task, onEdit, onDelete }: TaskProps) {
       style={style}
       className="relative bg-white border border-gray-200 rounded-lg p-4 mb-3 shadow-sm hover:shadow-md transition-shadow"
     >
-      <div className="flex justify-between items-center text-gray-800 text-sm mb-1">
+      <div className="flex justify-between items-center text-gray-500 text-sm mb-1">
         <span>ID: {task.tid}</span>
         <div className="flex items-center space-x-1">
           <button
@@ -141,7 +141,7 @@ export default function Task({ task, onEdit, onDelete }: TaskProps) {
 
       {isEditing && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-96 text-gray-800">
+          <div className="bg-white rounded-lg p-6 w-96">
             <h2 className="text-lg font-semibold mb-4">Edit Task</h2>
             <form onSubmit={handleEditSave}>
               <div className="mb-4">
