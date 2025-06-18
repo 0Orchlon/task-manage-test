@@ -1,7 +1,6 @@
-// NewTask.tsx
-import React, { useState } from "react";
-import { supabase } from "~/supabase";
+import { useState } from "react";
 import { useNavigate, useLocation } from "react-router";
+import { supabase } from "~/supabase";
 
 export default function NewTask() {
   const navigate = useNavigate();
@@ -45,11 +44,9 @@ export default function NewTask() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-black">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
-          Шинэ даалгавар нэмэх
-        </h2>
+        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Шинэ даалгавар нэмэх</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
@@ -76,9 +73,9 @@ export default function NewTask() {
             onChange={(e) => setPriority(e.target.value)}
             className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
           >
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
+            <option value="low">low</option>
+            <option value="medium">medium</option>
+            <option value="high">high</option>
           </select>
           <button
             type="submit"
@@ -86,10 +83,7 @@ export default function NewTask() {
           >
             Нэмэх
           </button>
-          <button
-            className="w-full bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700 transition duration-200"
-            onClick={() => navigate(-1)}
-          >
+          <button  className="w-full bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700 transition duration-200" onClick={() => navigate(-1)}>
             Буцах
           </button>
         </form>
