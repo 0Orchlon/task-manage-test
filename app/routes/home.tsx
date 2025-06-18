@@ -4,10 +4,10 @@ import { useNavigate } from "react-router";
 import type { Route } from "./+types/home";
 import Sidebar from "./sidebar";
 import Navbar from "./navbar";
-import KanbanBoard from "./kanbanBoard";
+import KanbanBoard from "./KanbanBoard";
 
 interface Project {
-  proid: number;
+  proid: number;  
   proname: string;
 }
 

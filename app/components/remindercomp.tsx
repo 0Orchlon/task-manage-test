@@ -21,7 +21,7 @@ export default function Reminder() {
   const [loading, setLoading] = useState(true);
   const [overduePage, setOverduePage] = useState(0);
   const [upcomingPage, setUpcomingPage] = useState(0);
-  const maxPerPage = 3;
+  const maxPerPage = 1;
 
   useEffect(() => {
     const loadReminders = async () => {

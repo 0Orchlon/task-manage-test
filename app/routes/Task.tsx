@@ -90,10 +90,13 @@ export default function Task({ task, onEdit, onDelete }: TaskProps) {
 
   return (
     <div
+
       style={style}
       className="relative bg-white border border-gray-200 rounded-lg p-4 mb-3 shadow-sm hover:shadow-md transition-shadow text-black"
     >
-      <div className="flex justify-between items-center text-gray-500 text-sm mb-1"
+      <div 
+
+      className="flex justify-between items-center text-gray-500 text-sm mb-1"
       >
         <span></span>
         <div className="flex items-center space-x-1">
