@@ -132,7 +132,7 @@ export default function Home() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-100 text-black ">
       <Sidebar
         projects={projects}
         onNewProject={() => setShowModal(true)}

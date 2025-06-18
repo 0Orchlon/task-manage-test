@@ -14,4 +14,5 @@ export default [
   route("forgotpass", "routes/forgot.tsx"),
   route("update-password", "routes/updatepass.tsx"),
 
+route("reminder", "components/remindercomp.tsx")
 ] satisfies RouteConfig;

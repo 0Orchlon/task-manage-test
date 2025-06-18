@@ -1,8 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 import Tasks from "../components/tasks";
 import { useNavigate } from "react-router";
-import { DeleteOutlined, EditOutlined, CheckOutlined, CloseOutlined, MoreOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  CheckOutlined,
+  CloseOutlined,
+  MoreOutlined,
+} from "@ant-design/icons";
 import { supabase } from "~/supabase";
+import Reminder from "~/components/remindercomp";
 
 interface Project {
   proid: number;
@@ -38,9 +45,16 @@ export default function Sidebar({
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editValue, setEditValue] = useState<string>("");
   const [localProjects, setLocalProjects] = useState<Project[]>(projects); // uurchlult shuud haruulah
-  const [contextMenu, setContextMenu] = useState<{ proid: number; x: number; y: number } | null>(null);
+  const [contextMenu, setContextMenu] = useState<{
+    proid: number;
+    x: number;
+    y: number;
+  } | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null); // ustgah zuvshuuruh
-  const [confirmingEdit, setConfirmingEdit] = useState<{ proid: number; newName: string } | null>(null); // edit batalgaajuulah
+  const [confirmingEdit, setConfirmingEdit] = useState<{
+    proid: number;
+    newName: string;
+  } | null>(null); // edit batalgaajuulah
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const sidebarRef = useRef<HTMLDivElement>(null); // gadna darah ued songoson component haah
@@ -53,7 +67,11 @@ export default function Sidebar({
   // gadna darh ued haah function
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (editingId !== null && sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+      if (
+        editingId !== null &&
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target as Node)
+      ) {
         cancelEdit();
       }
     };
@@ -96,7 +114,7 @@ export default function Sidebar({
   };
 
   const cancelEdit = () => {
-    const project = localProjects.find(p => p.proid === editingId);
+    const project = localProjects.find((p) => p.proid === editingId);
     if (project) {
       setEditValue(project.proname); // neriig dahin uurchluh
     }
@@ -104,7 +122,10 @@ export default function Sidebar({
     setConfirmingEdit(null);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, proid: number) => {
+  const handleKeyPress = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    proid: number
+  ) => {
     if (e.key === "Enter") {
       handleEditSave();
     } else if (e.key === "Escape") {
@@ -151,22 +172,24 @@ export default function Sidebar({
   // editelj baih ued haruulah
   useEffect(() => {
     if (editingId !== null) {
-      setLocalProjects(prevProjects =>
-        prevProjects.map(project =>
-          project.proid === editingId ? { ...project, proname: editValue } : project
+      setLocalProjects((prevProjects) =>
+        prevProjects.map((project) =>
+          project.proid === editingId
+            ? { ...project, proname: editValue }
+            : project
         )
       );
     }
   }, [editValue, editingId]);
 
   return (
-    <aside ref={sidebarRef} className="w-64 bg-gray-800 text-white p-4 flex flex-col relative">
+    <aside
+      ref={sidebarRef}
+      className="w-64 bg-gray-800 text-white p-4 flex flex-col relative"
+    >
       <h2 className="text-lg font-semibold mb-4">NOTIFICATION</h2>
-      <ul className="space-y-2">
-        <li>1</li>
-        <li>2</li>
-        <li>3</li>
-      </ul>
+
+      <Reminder onSelectProject={onSelectProject} />
 
       <h2 className="text-lg font-semibold mt-6 mb-4">PROJECTS</h2>
       <ul className="space-y-2">
@@ -174,12 +197,14 @@ export default function Sidebar({
           <li className="text-gray-400">Project байхгүй</li>
         )}
         {localProjects.map((project) => (
-          <li key={project.proid} onContextMenu={(e) => handleContextMenu(e, project.proid)}>
+          <li
+            key={project.proid}
+            onContextMenu={(e) => handleContextMenu(e, project.proid)}
+          >
             <div className="flex items-center justify-between cursor-pointer">
               <div
                 className="flex items-center cursor-pointer"
                 onClick={() => onSelectProject(project.proid)}
-
               >
                 <span className="mr-2">
                   {openProject === project.proid ? "📂" : "📁"}
@@ -248,7 +273,9 @@ export default function Sidebar({
                 <div className="flex gap-2 mt-2">
                   <button
                     className="bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
-                    onClick={() => confirmEdit(confirmingEdit.proid, confirmingEdit.newName)}
+                    onClick={() =>
+                      confirmEdit(confirmingEdit.proid, confirmingEdit.newName)
+                    }
                   >
                     Confirm
                   </button>
@@ -279,7 +306,9 @@ export default function Sidebar({
             <li
               className="px-2 py-1 hover:bg-gray-100 cursor-pointer"
               onClick={() => {
-                handleEdit(localProjects.find(p => p.proid === contextMenu.proid)!);
+                handleEdit(
+                  localProjects.find((p) => p.proid === contextMenu.proid)!
+                );
                 handleCloseContextMenu();
               }}
             >
