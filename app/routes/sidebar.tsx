@@ -4,6 +4,7 @@ import { useNavigate } from "react-router";
 import { DeleteOutlined, EditOutlined, MoreOutlined, UserAddOutlined } from "@ant-design/icons";
 import { supabase } from "~/supabase";
 import SearchUserAdd from "../components/SearchUserAdd";
+import Reminder from "~/components/remindercomp";
 
 interface Project {
   proid: number;
@@ -195,11 +196,7 @@ export default function Sidebar({
   return (
     <aside ref={sidebarRef} className="w-64 bg-gray-800 text-white p-4 flex flex-col relative">
       <h2 className="text-lg font-semibold mb-4">МЭДЭЭЛЭЛ</h2>
-      <ul className="space-y-2">
-        <li>1</li>
-        <li>2</li>
-        <li>3</li>
-      </ul>
+<Reminder onSelectProject={onSelectProject}/>
 
       <h2 className="text-lg font-semibold mt-6 mb-4">Projects</h2>
       <ul className="space-y-2">
