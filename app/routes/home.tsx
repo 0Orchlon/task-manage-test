@@ -181,11 +181,11 @@ export default function Home() {
         onDeleteProject={handleDeleteProject}
       />
 
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-auto">
         <Navbar user={user} />
 
         <div className="p-8">
-          <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
+          <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 overflow-auto">
             Тавтай морил, {user.user_metadata?.displayname || user.email}!
           </h2>
           {error && <p className="mb-4 text-red-500 text-center">{error}</p>}
