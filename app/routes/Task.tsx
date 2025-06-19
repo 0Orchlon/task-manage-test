@@ -252,7 +252,7 @@ export default function Task({
           user.image ? (
             <img
               key={user.uid}
-              src={user.image || "/default-avatar.png"}
+              src={user.image}
               alt={user.uname}
               title={user.uname}
               className="w-7 h-7 rounded-full object-cover border border-gray-300"
