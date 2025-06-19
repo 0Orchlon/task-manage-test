@@ -1,3 +1,4 @@
+//home.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "~/supabase";
 import { useNavigate } from "react-router";
@@ -33,6 +34,7 @@ export default function Home() {
       const { data: tasksData, error: tasksError } = await supabase
         .from("t_tasks")
         .select("tid, title, description, status, due_date, priority")
+
         .eq("proid", selectedProjectId);
 
       if (tasksError) {
@@ -196,6 +198,7 @@ export default function Home() {
           ) : (
             <KanbanBoard tasks={tasks} onTaskUpdate={getTasks} />
           )}
+
         </div>
       </div>
 
