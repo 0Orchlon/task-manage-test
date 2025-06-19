@@ -112,6 +112,7 @@ if (Array.isArray(projects)) {
   const handleEdit = (project: Project) => {
     setEditingId(project.proid);
     setEditValue(project.proname);
+
     setTimeout(() => inputRef.current?.focus(), 0);
   };
 
@@ -126,6 +127,12 @@ if (Array.isArray(projects)) {
       alert(`Проектын нэрийг шинэчлэхэд алдаа гарлаа: ${error.message}`);
       return;
     }
+    setLocalProjects((prev) =>
+      prev.map((p) => (p.proid === proid ? { ...p, proname: newName } : p))
+    );
+    localStorage.setItem("projects", JSON.stringify(
+      projects.map((p) => p.proid === proid ? { ...p, proname: newName } : p)
+    ));
     onProjectRename?.(proid, newName);
     setEditingId(null);
   };
