@@ -40,37 +40,28 @@ function useTasksByProject(proid: number) {
   return { tasks, loading };
 }
 
-export default function Tasks({
-  proid,
-  onTaskClick,
-  tasks: allTasks,
-}: TasksProps) {
+export default function Tasks({ proid, onTaskClick, tasks: allTasks }: TasksProps) {
   const navigate = useNavigate();
   const { tasks, loading } = useTasksByProject(proid);
 
   if (loading) return <div>Ачааллаж байна...</div>;
 
   return (
-    <div className="flex flex-col auto-cols-auto">
+    <div className="flex flex-col auto-cols-auto">  
       {tasks.length === 0 ? (
         <div className="text-gray-400 text-sm">Task байхгүй</div>
       ) : (
-        <ul className="divide-y divide-gray-200">
-          {tasks.length === 0 && (
-            <li className="py-2 text-center text-gray-500">
-              Даалгавар байхгүй
-            </li>
-          )}
-          {tasks.map((task) => (
-            <li
-              key={task.tid}
-              className=" flex flex-row py-1 px-1.5 rounded-xl hover:bg-gray-500 "
-            >
-              <MenuUnfoldOutlined />
-              <span className="px-15">{task.title}</span>
-            </li>
-          ))}
-        </ul>
+           <ul className="divide-y divide-gray-200">
+            {tasks.length === 0 && (
+              <li className="py-2 text-center text-gray-500">Даалгавар байхгүй</li>
+            )}
+            {tasks.map((task) => (
+              <li key={task.tid} className=" flex flex-row py-1 px-1.5 rounded-xl hover:bg-gray-500 ">
+                <MenuUnfoldOutlined />
+                <span className="px-15">{task.title}</span> 
+              </li>
+            ))}
+          </ul>
       )}
     </div>
   );

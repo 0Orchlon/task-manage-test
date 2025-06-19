@@ -1,3 +1,4 @@
+// column.tsx
 import React from "react";
 import { useDroppable } from "@dnd-kit/core";
 import Task from "./Task";
@@ -5,6 +6,7 @@ import Task from "./Task";
 type TaskType = {
   tid: number;
   title: string;
+  description: string;
   due_date: string;
   priority: "high" | "medium" | "low";
   status: number;

@@ -9,6 +9,13 @@ export default function UpdatePassword() {
   const navigate = useNavigate();
 
   useEffect(() => {
+      const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
+    if (event === "PASSWORD_RECOVERY" && session) {
+      // Auth state already recovered, you can show the form
+      console.log("Password recovery session restored.");
+    }
+  });
+
     const checkSession = async () => {
       const { data, error } = await supabase.auth.getSession();
       if (!data.session) {
@@ -16,6 +23,9 @@ export default function UpdatePassword() {
       }
     };
     checkSession();
+    return () => {
+    listener.subscription.unsubscribe();
+  };
   }, []);
 
   const handleUpdatePassword = async (e: FormEvent) => {
