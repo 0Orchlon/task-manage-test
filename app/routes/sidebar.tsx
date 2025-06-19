@@ -63,14 +63,14 @@ export default function Sidebar({
   }, [projects]);
 
   useEffect(() => {
+    if (addPeopleDialog) return; // dialog нээгдсэн үед click outside ажиллахгүй
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        (editingId !== null || addPeopleDialog !== null) &&
+        (editingId !== null) &&
         sidebarRef.current &&
         !sidebarRef.current.contains(event.target as Node)
       ) {
         setEditingId(null);
-        setAddPeopleDialog(null);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);

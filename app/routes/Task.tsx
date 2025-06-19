@@ -141,7 +141,7 @@ export default function Task({
           <button
             onClick={() => {
               setOpenDropdown(false);
-              if (confirm("Та энэ даалгаврыг устгах уу?")) {
+              if (confirm("Are you sure you want to delete this task?")) {
                 onDelete(task.tid);
               }
             }}

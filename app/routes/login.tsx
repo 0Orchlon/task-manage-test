@@ -50,7 +50,7 @@ useEffect(() => {
     }
 
     if (data.user) {
-      navigate("/"); // Гэрийн хуудас руу шилжих
+      navigate("/"); //  Redirect to index page
     }
   };
 
