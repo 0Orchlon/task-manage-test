@@ -5,8 +5,6 @@ import { DeleteOutlined, EditOutlined, MoreOutlined, UserAddOutlined } from "@an
 import { supabase } from "~/supabase";
 import SearchUserAdd from "../components/SearchUserAdd";
 import Reminder from "~/components/remindercomp";
-import { createPortal } from "react-dom";
-import { add } from "@dnd-kit/utilities";
 
 interface Project {
   proid: number;
@@ -80,6 +78,7 @@ if (Array.isArray(projects)) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [editingId, addPeopleDialog]);
 
+  // Fetch users for the selected project
   useEffect(() => {
     const fetchProjectUsers = async () => {
       if (openProject !== null) {
@@ -95,7 +94,7 @@ if (Array.isArray(projects)) {
         if (userIds.length > 0) {
           const { data: users, error: usersError } = await supabase
             .from("t_users")
-            .select("uid, uname, image")  
+            .select("uid, uname, image")
             .in("uid", userIds);
           if (usersError) {
             console.error("Хэрэглэгчийн мэдээлэл татахад алдаа гарлаа:", usersError.message);
@@ -124,8 +123,8 @@ if (Array.isArray(projects)) {
       .update({ proname: newName })
       .eq("proid", proid);
     if (error) {
-      console.error("Project шинэчлэхэд алдаа гарлаа:", error.message);
-      alert(`Project нэрийг шинэчлэхэд алдаа гарлаа: ${error.message}`);
+      console.error("Проектыг шинэчлэхэд алдаа гарлаа:", error.message);
+      alert(`Проектын нэрийг шинэчлэхэд алдаа гарлаа: ${error.message}`);
       return;
     }
     setLocalProjects((prev) =>
@@ -178,14 +177,15 @@ if (Array.isArray(projects)) {
         .delete()
         .eq("proid", proid);
       if (projectError) {
-        alert("Project устгахад алдаа гарлаа: " + projectError.message);
+        alert("Проектыг устгахад алдаа гарлаа: " + projectError.message);
         return;
       }
 
       onDeleteProject(proid);
       setDeletingId(null);
     } catch (error: any) {
-      alert("Project устгахад алдаа гарлаа: " + error.message);
+      alert("Проектыг устгахад алдаа гарлаа: " + error.message);
+
     }
   };
 
@@ -226,10 +226,7 @@ if (Array.isArray(projects)) {
   };
 
   return (
-    <aside 
-  ref={sidebarRef}
-  className="w-64 bg-gray-800 text-white p-4 flex flex-col relative h-screen overflow-y-auto"
-    >
+    <aside ref={sidebarRef} className="w-64 bg-gray-800 text-white p-4 flex flex-col relative">
       <h2 className="text-lg font-semibold mb-4">МЭДЭЭЛЭЛ</h2>
 <Reminder 
 />
@@ -334,19 +331,15 @@ if (Array.isArray(projects)) {
           </li>
         ))}
         <li className="text-blue-400 cursor-pointer" onClick={onNewProject}>
-          + ШИНЭ PROJECT
+          + ШИНЭ ПРОЖЕКТ
         </li>
       </ul>
 
-      {contextMenu && createPortal(
+      {contextMenu && (
         <div
-          style={{
-            position: "absolute",
-            top: contextMenu.y,
-            left: contextMenu.x,
-            zIndex: 9999,
-          }}
-          className="bg-white shadow rounded text-black"
+          className="absolute bg-white text-black shadow-lg rounded p-2 z-10"
+          style={{ top: contextMenu.y, left: contextMenu.x }}
+          onClick={handleCloseContextMenu}
         >
           <ul className="min-w-[150px]">
             <li
@@ -367,53 +360,46 @@ if (Array.isArray(projects)) {
             >
               <DeleteOutlined className="mr-2 text-red-600" /> Delete
             </li>
-            <li 
-            className="px-2 py-1 hover:bg-gray-100 cursor-pointer"
-            onClick={ handleCloseContextMenu}>Цуцлах</li>
+            <li className="px-2 py-1 hover:bg-gray-100 cursor-pointer">Цуцлах</li>
           </ul>
-        </div>,
-        document.body 
+        </div>
       )}
 
-      {addPeopleDialog && createPortal(
+      {addPeopleDialog && (
         <div
-          className="fixed inset-0 z-50 flex items-start justify-center"
-          style={{pointerEvents: 'none'}}
+          className="absolute bg-white text-black shadow-lg rounded p-4 z-10"
+          style={{ top: addPeopleDialog.y, left: addPeopleDialog.x, width: '300px', maxHeight: '400px' }}
         >
-          <div
-            className="absolute bg-white text-black shadow-lg rounded p-4 z-50"
-            style={{
-              top:addPeopleDialog.y,
-              left: addPeopleDialog.x,
-              width: '300px',
-              maxHeight: '400px',
-              pointerEvents: 'auto',
+          <h3 className="text-lg font-semibold mb-2">Хүн нэмэх</h3>
+          <SearchUserAdd
+            proid={addPeopleDialog.proid}
+            onUserAdded={(newUser: User) => {
+              setProjectUsers(prev => ({
+                ...prev,
+                [addPeopleDialog.proid]: [
+                  ...(prev[addPeopleDialog.proid] || []),
+                  newUser
+                ]
+              }));
+              handleCloseAddPeopleDialog();
             }}
-            onClick={e => e.stopPropagation()}
-          >
-              <h3 className="text-lg font-semibold mb-2 text-black">Хүн нэмэх</h3>
-              <SearchUserAdd
-                proid={addPeopleDialog.proid}
-                onUserAdded={handleCloseAddPeopleDialog}
-              />
-              <div className="mt-2 flex justify-between">
-                <button
-                  className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700"
-                  onClick={() => alert("Тусламж хэсэгт холбоо барина уу!")}
-                >
-                  Тусламж
-                </button>
-                <button
-                  className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-700"
-                  onClick={handleCloseAddPeopleDialog}
-                >
-                  Хаах
-                </button>
-              </div>
+          />
+          <div className="mt-2 flex justify-between">
+            <button
+              className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700"
+              onClick={() => alert("Тусламж хэсэгт холбоо барина уу!")}
+            >
+              Тусламж
+            </button>
+            <button
+              className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-700"
+              onClick={handleCloseAddPeopleDialog}
+            >
+              Хаах
+            </button>
           </div>
-        </div>,
-        document.body
+        </div>
       )}
     </aside>
   );
-}
+  }
