@@ -225,7 +225,10 @@ if (Array.isArray(projects)) {
   };
 
   return (
-    <aside ref={sidebarRef} className="w-64 bg-gray-800 text-white p-4 flex flex-col relative">
+    <aside 
+  ref={sidebarRef}
+  className="w-64 bg-gray-800 text-white p-4 flex flex-col relative h-screen overflow-y-auto"
+    >
       <h2 className="text-lg font-semibold mb-4">МЭДЭЭЛЭЛ</h2>
 <Reminder 
 />
