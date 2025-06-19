@@ -1,12 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import Tasks from "../components/tasks";
 import { useNavigate } from "react-router";
 import { DeleteOutlined, EditOutlined, MoreOutlined, UserAddOutlined } from "@ant-design/icons";
 import { supabase } from "~/supabase";
 import SearchUserAdd from "../components/SearchUserAdd";
 import Reminder from "~/components/remindercomp";
 import { createPortal } from "react-dom";
-import { add } from "@dnd-kit/utilities";
 
 interface Project {
   proid: number;
@@ -35,7 +33,6 @@ interface SidebarProps {
   onProjectRename?: (proid: number, newName: string) => void;
   setSelectedProjectId: (id: number) => void;
   selectedProjectId: number | null;
-
 }
 
 export default function Sidebar({
@@ -60,60 +57,60 @@ export default function Sidebar({
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-if (Array.isArray(projects)) {
-    setLocalProjects(projects);
-  }
-}, [projects]);
+    if (Array.isArray(projects)) {
+      setLocalProjects(projects);
+    }
+  }, [projects]);
 
   useEffect(() => {
+    if (addPeopleDialog) return; // dialog нээгдсэн үед click outside ажиллахгүй
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        (editingId !== null || addPeopleDialog !== null) &&
+        (editingId !== null) &&
         sidebarRef.current &&
         !sidebarRef.current.contains(event.target as Node)
       ) {
         setEditingId(null);
-        setAddPeopleDialog(null);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [editingId, addPeopleDialog]);
 
-  useEffect(() => {
-    const fetchProjectUsers = async () => {
-      if (openProject !== null) {
-        const { data, error } = await supabase
-          .from("t_project_users")
-          .select("uid")
-          .eq("proid", openProject);
-        if (error) {
-          console.error("Хэрэглэгчдийг нэмэхэд алдаа гарлаа:", error.message);
+  const fetchProjectUsers = async () => {
+    if (openProject !== null) {
+      const { data, error } = await supabase
+        .from("t_project_users")
+        .select("uid")
+        .eq("proid", openProject);
+      if (error) {
+        console.error("Error to fetch project users:", error.message);
+        return;
+      }
+      const userIds = data.map((item) => item.uid);
+      if (userIds.length > 0) {
+        const { data: users, error: usersError } = await supabase
+          .from("t_users")
+          .select("uid, uname, image")
+          .in("uid", userIds);
+        if (usersError) {
+          console.error("Error to fetch user details:", usersError.message);
           return;
         }
-        const userIds = data.map((item) => item.uid);
-        if (userIds.length > 0) {
-          const { data: users, error: usersError } = await supabase
-            .from("t_users")
-            .select("uid, uname, image")  
-            .in("uid", userIds);
-          if (usersError) {
-            console.error("Хэрэглэгчийн мэдээлэл татахад алдаа гарлаа:", usersError.message);
-            return;
-          }
-          setProjectUsers((prev) => ({ ...prev, [openProject]: users || [] }));
-        } else {
-          setProjectUsers((prev) => ({ ...prev, [openProject]: [] }));
-        }
+        setProjectUsers((prev) => ({ ...prev, [openProject]: users || [] }));
+      } else {
+        setProjectUsers((prev) => ({ ...prev, [openProject]: [] }));
       }
-    };
+    }
+  };
+
+  useEffect(() => {
     fetchProjectUsers();
   }, [openProject]);
 
   const handleEdit = (project: Project) => {
     setEditingId(project.proid);
     setEditValue(project.proname);
-
     setTimeout(() => inputRef.current?.focus(), 0);
   };
 
@@ -124,16 +121,17 @@ if (Array.isArray(projects)) {
       .update({ proname: newName })
       .eq("proid", proid);
     if (error) {
-      console.error("Project шинэчлэхэд алдаа гарлаа:", error.message);
-      alert(`Project нэрийг шинэчлэхэд алдаа гарлаа: ${error.message}`);
+      console.error("Error to rename project:", error.message);
+      alert(`Error to rename project: ${error.message}`);
       return;
     }
     setLocalProjects((prev) =>
       prev.map((p) => (p.proid === proid ? { ...p, proname: newName } : p))
     );
-    localStorage.setItem("projects", JSON.stringify(
-      projects.map((p) => p.proid === proid ? { ...p, proname: newName } : p)
-    ));
+    localStorage.setItem(
+      "projects",
+      JSON.stringify(projects.map((p) => (p.proid === proid ? { ...p, proname: newName } : p)))
+    );
     onProjectRename?.(proid, newName);
     setEditingId(null);
   };
@@ -152,40 +150,37 @@ if (Array.isArray(projects)) {
 
   const confirmDelete = async (proid: number) => {
     try {
-      // buh hereglegchdiig ustgana
       const { error: usersError } = await supabase
         .from("t_project_users")
         .delete()
         .eq("proid", proid);
       if (usersError) {
-        alert("Хэрэглэгчдийг устгахад алдаа гарлаа: " + usersError.message);
+        alert("Error to remove users: " + usersError.message);
         return;
       }
 
-      // buh task ustgana
       const { error: tasksError } = await supabase
         .from("t_tasks")
         .delete()
         .eq("proid", proid);
       if (tasksError) {
-        alert("Даалгавруудыг устгахад алдаа гарлаа: " + tasksError.message);
+        alert("Error to remove tasks: " + tasksError.message);
         return;
       }
 
-      // tusluu ustgana
       const { error: projectError } = await supabase
         .from("t_project")
         .delete()
         .eq("proid", proid);
       if (projectError) {
-        alert("Project устгахад алдаа гарлаа: " + projectError.message);
+        alert("Error to remove project: " + projectError.message);
         return;
       }
 
       onDeleteProject(proid);
       setDeletingId(null);
     } catch (error: any) {
-      alert("Project устгахад алдаа гарлаа: " + error.message);
+      alert("Error to remove project: " + error.message);
     }
   };
 
@@ -196,14 +191,14 @@ if (Array.isArray(projects)) {
         .delete()
         .eq("proid", proid)
         .eq("uid", uid);
-      if (error) throw new Error(`Хэрэглэгчийг устгахад алдаа гарлаа: ${error.message}`);
+      if (error) throw new Error(`Error to remove user: ${error.message}`);
       setProjectUsers((prev) => ({
         ...prev,
         [proid]: prev[proid]?.filter((user) => user.uid !== uid) || [],
       }));
     } catch (error: any) {
-      console.error("Хэрэглэгчийг устгахад алдаа гарлаа:", error.message);
-      alert(`Хэрэглэгчийг устгахад алдаа гарлаа: ${error.message}`);
+      console.error("Error to remove user:", error.message);
+      alert(`Error to remove user: ${error.message}`);
     }
   };
 
@@ -226,17 +221,16 @@ if (Array.isArray(projects)) {
   };
 
   return (
-    <aside 
-  ref={sidebarRef}
-  className="w-64 bg-gray-800 text-white p-4 flex flex-col relative h-screen overflow-y-auto"
+    <aside
+      ref={sidebarRef}
+      className="w-64 bg-gray-800 text-white p-4 flex flex-col relative h-screen overflow-y-auto"
     >
-      <h2 className="text-lg font-semibold mb-4">МЭДЭЭЛЭЛ</h2>
-<Reminder 
-/>
+      <h2 className="text-lg font-semibold mb-4"> Notifications </h2>
+      <Reminder />
 
       <h2 className="text-lg font-semibold mt-6 mb-4">Projects</h2>
       <ul className="space-y-2">
-        {localProjects.length === 0 && <li className="text-gray-400">Projects байхгүй</li>}
+        {localProjects.length === 0 && <li className="text-gray-400">No project</li>}
         {localProjects.map((project) => (
           <li key={project.proid} onContextMenu={(e) => handleContextMenu(e, project.proid)}>
             <div className="flex items-center justify-between">
@@ -278,36 +272,38 @@ if (Array.isArray(projects)) {
             </div>
             {openProject === project.proid && (
               <div className="ml-6 mt-2">
-                {/* <Tasks
-                  tasks={tasks.filter((task) => task.proid === project.proid)}
-                  proid={project.proid}
-                  onTaskClick={onTaskClick}
-                /> */}
-                <h4 className="text-sm font-medium mt-2">Багийн гишүүд:</h4>
+                <h4 className="text-sm font-medium mt-2">Group members:</h4>
                 <ul className="mt-1 space-y-1">
-                  {projectUsers[project.proid]?.length > 0 ? (
-                    projectUsers[project.proid].map((user) => (
-                      <li key={user.uid} className="flex items-center justify-between gap-2 text-sm">
-                        <div className="flex items-center gap-2">
-                          {user.image && (
-                            <img
-                              src={user.image}
-                              alt={user.uname}
-                              className="w-5 h-5 rounded-full"
-                            />
-                          )}
-                          <span>{user.uname}</span>
-                        </div>
-                        <button
-                          className="text-red-400 hover:text-red-600"
-                          onClick={() => handleRemoveUser(project.proid, user.uid)}
-                        >
-                          <DeleteOutlined />
-                        </button>
-                      </li>
-                    ))
+                  {(projectUsers[project.proid] || []).length > 0 ? (
+                    projectUsers[project.proid]
+                      .filter((user): user is User => !!user)
+                      .map((user) => (
+                        <li key={user.uid} className="flex items-center justify-between gap-2 text-sm">
+                          <div className="flex items-center gap-2">
+                            {user.image ? (
+                              <img
+                                src={user.image}
+                                alt={user.uname}
+                                className="w-5 h-5 rounded-full"
+                                onError={(e) => {
+                                  e.currentTarget.src = "/default-avatar.png";
+                                }}
+                              />
+                            ) : (
+                              <div className="w-5 h-5 rounded-full bg-gray-500" />
+                            )}
+                            <span>{user.uname}</span>
+                          </div>
+                          <button
+                            className="text-red-400 hover:text-red-600"
+                            onClick={() => handleRemoveUser(project.proid, user.uid)}
+                          >
+                            <DeleteOutlined />
+                          </button>
+                        </li>
+                      ))
                   ) : (
-                    <li className="text-gray-500 text-sm">Гишүүд алга</li>
+                    <li className="text-gray-500 text-sm">No members</li>
                   )}
                 </ul>
               </div>
@@ -334,86 +330,98 @@ if (Array.isArray(projects)) {
           </li>
         ))}
         <li className="text-blue-400 cursor-pointer" onClick={onNewProject}>
-          + ШИНЭ PROJECT
+          + new project
         </li>
       </ul>
 
-      {contextMenu && createPortal(
-        <div
-          style={{
-            position: "absolute",
-            top: contextMenu.y,
-            left: contextMenu.x,
-            zIndex: 9999,
-          }}
-          className="bg-white shadow rounded text-black"
-        >
-          <ul className="min-w-[150px]">
-            <li
-              className="px-2 py-1 hover:bg-gray-100 cursor-pointer"
-              onClick={() => handleEdit(localProjects.find((p) => p.proid === contextMenu.proid)!)}
-            >
-              <EditOutlined className="mr-2" /> Rename
-            </li>
-            <li
-              className="px-2 py-1 hover:bg-gray-100 cursor-pointer"
-              onClick={() => handleAddPeople(contextMenu.proid, contextMenu.x, contextMenu.y)}
-            >
-              <UserAddOutlined className="mr-2 text-blue-600" /> Хүн нэмэх
-            </li>
-            <li
-              className="px-2 py-1 hover:bg-gray-100 cursor-pointer"
-              onClick={() => handleDeleteClick(contextMenu.proid)}
-            >
-              <DeleteOutlined className="mr-2 text-red-600" /> Delete
-            </li>
-            <li 
-            className="px-2 py-1 hover:bg-gray-100 cursor-pointer"
-            onClick={ handleCloseContextMenu}>Цуцлах</li>
-          </ul>
-        </div>,
-        document.body 
-      )}
-
-      {addPeopleDialog && createPortal(
-        <div
-          className="fixed inset-0 z-50 flex items-start justify-center"
-          style={{pointerEvents: 'none'}}
-        >
+      {contextMenu &&
+        createPortal(
           <div
-            className="absolute bg-white text-black shadow-lg rounded p-4 z-50"
             style={{
-              top:addPeopleDialog.y,
-              left: addPeopleDialog.x,
-              width: '300px',
-              maxHeight: '400px',
-              pointerEvents: 'auto',
+              position: "absolute",
+              top: contextMenu.y,
+              left: contextMenu.x,
+              zIndex: 9999,
             }}
-            onClick={e => e.stopPropagation()}
+            className="bg-white shadow rounded text-black"
           >
+            <ul className="min-w-[150px]">
+              <li
+                className="px-2 py-1 hover:bg-gray-100 cursor-pointer"
+                onClick={() => handleEdit(localProjects.find((p) => p.proid === contextMenu.proid)!)}
+              >
+                <EditOutlined className="mr-2" /> Rename
+              </li>
+              <li
+                className="px-2 py-1 hover:bg-gray-100 cursor-pointer"
+                onClick={() => handleAddPeople(contextMenu.proid, contextMenu.x, contextMenu.y)}
+              >
+                <UserAddOutlined className="mr-2 text-blue-600" /> add people
+              </li>
+              <li
+                className="px-2 py-1 hover:bg-gray-100 cursor-pointer"
+                onClick={() => handleDeleteClick(contextMenu.proid)}
+              >
+                <DeleteOutlined className="mr-2 text-red-600" /> Delete
+              </li>
+              <li
+                className="px-2 py-1 hover:bg-gray-100 cursor-pointer"
+                onClick={handleCloseContextMenu}
+              >
+                cancel
+              </li>
+            </ul>
+          </div>,
+          document.body
+        )}
+
+      {addPeopleDialog &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-50 flex items-start justify-center"
+            style={{ pointerEvents: "none" }}
+          >
+            <div
+              className="absolute bg-white text-black shadow-lg rounded p-4 z-50"
+              style={{
+                top: addPeopleDialog.y,
+                left: addPeopleDialog.x,
+                width: "300px",
+                maxHeight: "400px",
+                pointerEvents: "auto",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
               <h3 className="text-lg font-semibold mb-2 text-black">Хүн нэмэх</h3>
               <SearchUserAdd
                 proid={addPeopleDialog.proid}
-                onUserAdded={handleCloseAddPeopleDialog}
+                onUserAdded={(newUser: User) => {
+                  setProjectUsers((prev) => ({
+                    ...prev,
+                    [addPeopleDialog.proid]: [...(prev[addPeopleDialog.proid] || []), newUser],
+                  }));
+                  fetchProjectUsers(); // Supabase-ийн өгөгдлийг баталгаажуулах
+                  handleCloseAddPeopleDialog();
+                }}
               />
               <div className="mt-2 flex justify-between">
                 <button
                   className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700"
                   onClick={() => alert("Тусламж хэсэгт холбоо барина уу!")}
                 >
-                  Тусламж
+                  help
                 </button>
                 <button
                   className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-700"
                   onClick={handleCloseAddPeopleDialog}
                 >
-                  Хаах
+                  close
                 </button>
               </div>
-          </div>
-        </div>,
-        document.body
-      )}
+            </div>
+          </div>,
+          document.body
+        )}
     </aside>
   );
 }

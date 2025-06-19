@@ -87,7 +87,7 @@ export default function Task({
 
     onEdit(updatedTask);
     setIsEditing(false);
-    alert("Амжилттай шинэчлэгдлээ!");
+    alert("Task updated successfully");
   };
   const getInitials = (name: string) => {
     return name
@@ -141,7 +141,7 @@ export default function Task({
           <button
             onClick={() => {
               setOpenDropdown(false);
-              if (confirm("Та энэ даалгаврыг устгах уу?")) {
+              if (confirm("Are you sure you want to delete this task?")) {
                 onDelete(task.tid);
               }
             }}

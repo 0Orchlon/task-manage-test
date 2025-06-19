@@ -54,7 +54,7 @@ export default function Column({
         .in("taskid", taskIds);
 
       if (error) {
-        console.error("Хэрэглэгчдийн мэдээлэл татахад алдаа гарлаа:", error);
+        console.error("Error to fetch assigned users:", error);
         setAssignedUsersMap({});
         return;
       }
@@ -106,7 +106,7 @@ export default function Column({
         return newMap;
       });
 
-      alert("Хэрэглэгч амжилттай устгагдлаа.");
+      alert("User removed successfully.");
       return;
     }
 
@@ -123,7 +123,7 @@ export default function Column({
     // UI шинэчлэх: шинээр нэмсэн хэрэглэгчийг state-д нэмэх
     const newUser = users.find((u) => u.uid === userId);
     if (!newUser) {
-      alert("Хэрэглэгч олдсонгүй.");
+      alert("User not found.");
       return;
     }
 
@@ -133,7 +133,7 @@ export default function Column({
       return newMap;
     });
 
-    alert("Хэрэглэгч амжилттай даалгаварт оноогдлоо.");
+    alert("User assigned successfully.");
   };
 
   return (
@@ -145,7 +145,7 @@ export default function Column({
     >
       <h3 className="text-lg font-semibold text-gray-700 mb-4">{title}</h3>
       {tasks.length === 0 ? (
-        <p className="text-sm text-gray-400">Даалгавар байхгүй байна.</p>
+        <p className="text-sm text-gray-400">No tasks</p>
       ) : (
         tasks.map((task) => (
           <Task

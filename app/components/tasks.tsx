@@ -44,16 +44,16 @@ export default function Tasks({ proid, onTaskClick, tasks: allTasks }: TasksProp
   const navigate = useNavigate();
   const { tasks, loading } = useTasksByProject(proid);
 
-  if (loading) return <div>Ачааллаж байна...</div>;
+  if (loading) return <div>loading..</div>;
 
   return (
     <div className="flex flex-col auto-cols-auto">  
       {tasks.length === 0 ? (
-        <div className="text-gray-400 text-sm">Task байхгүй</div>
+        <div className="text-gray-400 text-sm">No task</div>
       ) : (
            <ul className="divide-y divide-gray-200">
             {tasks.length === 0 && (
-              <li className="py-2 text-center text-gray-500">Даалгавар байхгүй</li>
+              <li className="py-2 text-center text-gray-500">No tasks</li>
             )}
             {tasks.map((task) => (
               <li key={task.tid} className=" flex flex-row py-1 px-1.5 rounded-xl hover:bg-gray-500 ">

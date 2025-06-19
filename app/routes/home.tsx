@@ -14,8 +14,8 @@ interface Project {
 
 export const meta = ({}: Route.MetaArgs) => {
   return [
-    { title: "Даалгаврын Удирдлага" },
-    { name: "description", content: "Таны даалгавруудыг удирдах апп" },
+    { title: "Task Management" },
+    { name: "description", content: "An app to manage your tasks" },
   ];
 };
 
@@ -37,7 +37,7 @@ export default function Home() {
         .eq("proid", selectedProjectId);
         
       if (tasksError) {
-        setError(`Даалгавруудыг татахад алдаа гарлаа: ${tasksError.message}`);
+        setError(`Error to fetch tasks: ${tasksError.message}`);
       } else {
         setTasks(tasksData);
       }
@@ -61,7 +61,7 @@ export default function Home() {
         .eq("uid", data.user.id);
 
       if (projectUserError) {
-        setError(`Даалгаврыг харуулахад алдаа гарлаа: ${projectUserError.message}`);
+        setError(`Error to fetch project users: ${projectUserError.message}`);
         return;
       }
 
@@ -72,7 +72,7 @@ export default function Home() {
         .in("proid", projectIds);
 
       if (projectsError) {
-        setError(`Төслийг татахад алдаа гарлаа: ${projectsError.message}`);
+        setError(`Error to fetch projects: ${projectsError.message}`);
       } else {
         setProjects(projectsData || []);
         if (projectsData && projectsData.length > 0) {
@@ -92,7 +92,7 @@ export default function Home() {
     setError(null);
 
     if (!newProjectName.trim()) {
-      setError("Төслийн нэрийг оруулна уу.");
+      setError("enter a project name");
       return;
     }
 
@@ -103,12 +103,12 @@ export default function Home() {
         .select();
 
       if (insertError) {
-        setError(`Шинэ төсөл нэмэхэд алдаа гарлаа: ${insertError.message}`);
+        setError(`Error to add new project: ${insertError.message}`);
         return;
       }
 
       if (!insertedData || insertedData.length === 0) {
-        setError("Төсөл амжилттай нэмэгдсэн боловч өгөгдөл буцаагдсангүй.");
+        setError("Project added successfully but no data returned.");
         return;
       }
 
@@ -119,7 +119,7 @@ export default function Home() {
         .insert([{ proid: newProject.proid, uid: user.id, share_id: Math.floor(Math.random() * 1000000) }]);
 
       if (userLinkError) {
-        setError(`Төсөлтэй хэрэглэгчийг холбоход алдаа гарлаа: ${userLinkError.message}`);
+        setError(`Error to link user to project: ${userLinkError.message}`);
         return;
       }
 
@@ -128,12 +128,12 @@ export default function Home() {
       setShowModal(false);
       setSelectedProjectId(newProject.proid);
     } catch (e) {
-      setError(`Алдаа гарлаа: ${e instanceof Error ? e.message : String(e)}`);
+      setError(`Error: ${e instanceof Error ? e.message : String(e)}`);
     }
   };
 
   const handleDeleteProject = async (proid: number) => {
-    if (!window.confirm("Та энэ төслийг устгахдаа итгэлтэй байна уу?")) return;
+    if (!window.confirm("Are you sure you want to delete this project?")) return;
 
     const { error: userError } = await supabase
       .from("t_project_users")
@@ -141,7 +141,7 @@ export default function Home() {
       .eq("proid", proid);
 
     if (userError) {
-      setError("Төслийн хэрэглэгчдийг устгахад алдаа гарлаа: " + userError.message);
+      setError("Error to delete project users: " + userError.message);
       return;
     }
 
@@ -151,7 +151,7 @@ export default function Home() {
       .eq("proid", proid);
 
     if (projectError) {
-      setError("Төслийг устгахад алдаа гарлаа: " + projectError.message);
+      setError("Error to delete project: " + projectError.message);
       return;
     }
 
@@ -169,7 +169,7 @@ export default function Home() {
   };
 
   if (!user) {
-    return <div>Ачааллаж байна...</div>;
+    return <div>Loading...</div>;
   }
 const selectedProject = projects.find(p => p.proid === selectedProjectId);
 
@@ -191,10 +191,10 @@ const selectedProject = projects.find(p => p.proid === selectedProjectId);
             {selectedProject?.proname ?? "Project"}!
           </h2>
           {error && <p className="mb-4 text-red-500 text-center">{error}</p>}
-          <h3 className="text-xl font-semibold mb-4 text-black">Таны даалгаврууд</h3>
+          <h3 className="text-xl font-semibold mb-4 text-black">Your Tasks</h3>
 
           {!selectedProjectId ? (
-            <p className="text-center text-gray-500">Төслийг сонгоно уу...</p>
+            <p className="text-center text-gray-500">Please select a project...</p>
           ) : (
             <KanbanBoard tasks={tasks} proj={selectedProjectId} onTaskUpdate={getTasks} />
           )}
@@ -205,26 +205,26 @@ const selectedProject = projects.find(p => p.proid === selectedProjectId);
       {showModal && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-            <h3 className="text-lg font-semibold mb-4 text-black">Шинэ Төсөл Нэмэх</h3>
+            <h3 className="text-lg font-semibold mb-4 text-black">Add New Project</h3>
             <input
               type="text"
               value={newProjectName}
               onChange={(e) => setNewProjectName(e.target.value)}
               className="w-full p-2 mb-4 border rounded text-black"
-              placeholder="Төслийн нэрийг оруулна уу"
+              placeholder="Enter project name"
             />
             <div className="flex justify-end space-x-4">
               <button
                 onClick={() => setShowModal(false)}
                 className="bg-gray-500 text-white py-2 px-4 rounded"
               >
-                Хаах
+                Close
               </button>
               <button
                 onClick={addNewProject}
                 className="bg-blue-500 text-white py-2 px-4 rounded"
               >
-                Нэмэх
+                Add
               </button>
             </div>
           </div>
