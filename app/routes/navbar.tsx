@@ -76,7 +76,7 @@ export default function Navbar({ user }: NavbarProps) {
 
   return (
     <nav className="bg-white shadow-md p-4 flex justify-between items-center relative">
-      <h1 className="text-xl font-bold text-black">Даалгаврын Удирдлага</h1>
+      <h1 className="text-xl font-bold text-black">Task Management</h1>
       <div className="relative">
         <button
           onClick={() => setDropdownOpen((prev) => !prev)}
@@ -107,13 +107,13 @@ export default function Navbar({ user }: NavbarProps) {
               }}
               className="block w-full px-4 py-2 text-left text-gray-600 hover:bg-gray-100"
             >
-              Профайл
+              Profile
             </button>
             <button
               onClick={handleLogout}
               className="block w-full px-4 py-2 text-left text-red-600 hover:bg-gray-100"
             >
-              Гарах
+              Log Out
             </button>
           </div>
         )}

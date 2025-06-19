@@ -87,7 +87,7 @@ export default function Task({
 
     onEdit(updatedTask);
     setIsEditing(false);
-    alert("Амжилттай шинэчлэгдлээ!");
+    alert("Task updated successfully");
   };
   const getInitials = (name: string) => {
     return name

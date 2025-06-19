@@ -36,7 +36,7 @@ export default function SearchUserAdd({ proid, onUserAdded }: Props) {
         if (error) throw error;
         setResults(data ?? []);
       } catch (err: any) {
-        setError("Хайлт хийхэд алдаа гарлаа.");
+        setError("error to fetch users: " + err.message);
       } finally {
         setLoading(false);
       }
@@ -56,7 +56,7 @@ export default function SearchUserAdd({ proid, onUserAdded }: Props) {
       if (checkError) throw checkError;
 
       if (existingUsers.length > 0) {
-        alert("Хэрэглэгч аль хэдийн нэмэгдсэн байна!");
+        alert("User is already added!");
         return;
       }
 
@@ -76,11 +76,11 @@ export default function SearchUserAdd({ proid, onUserAdded }: Props) {
         onUserAdded(user);
       }
 
-      alert("Хэрэглэгч амжилттай нэмэгдлээ");
+      alert("User added successfully");
       setSearch("");
       setResults([]);
     } catch (err: any) {
-      alert(`Хэрэглэгч нэмэхэд алдаа гарлаа: ${err.message}`);
+      alert(`Error to add user: ${err.message}`);
     }
   };
 
@@ -89,10 +89,10 @@ export default function SearchUserAdd({ proid, onUserAdded }: Props) {
       <input
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        placeholder="Хэрэглэгчийн нэрээр хайх..."
+        placeholder="Search by username..."
         className="w-full p-2 rounded border"
       />
-      {loading && <p className="text-sm text-gray-500 mt-1">Уншиж байна...</p>}
+      {loading && <p className="text-sm text-gray-500 mt-1">Loading...</p>}
       {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
       <ul className="mt-2 space-y-1 max-h-80 overflow-y-auto">
         {results.map((user) => (
@@ -112,7 +112,7 @@ export default function SearchUserAdd({ proid, onUserAdded }: Props) {
               <span>{user.uname}</span>
             </div>
             <button className="bg-blue-500 text-white px-2 py-0.5 rounded text-xs">
-              Нэмэх
+              Add
             </button>
           </li>
         ))}

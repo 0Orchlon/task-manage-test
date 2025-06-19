@@ -27,7 +27,7 @@ useEffect(() => {
     setError(null);
 
     if (password !== password2){
-      setError("Нууц үг таарахгүй байна.")
+      setError("Did not match password");
       return}
 
       // Supabase auth hereglegch burtgh
@@ -56,7 +56,7 @@ useEffect(() => {
         .single();
         
         if (existingUser) {
-        setError("Энэ хэрэглэгчийн нэр аль хэдийн бүртгэгдсэн байна.");
+        setError("This username is already taken.");
         navigate("/login");
         return;
       }
@@ -71,11 +71,11 @@ useEffect(() => {
         ]);
 
       if (insertError) {
-        setError(`Хэрэглэгчийн мэдээллийг хадгалахад алдаа гарлаа: ${insertError.message}`);
+        setError(`Error to save user data: ${insertError.message}`);
         return;
       }
 
-      alert("Амжилттай бүртгэгдлээ. Имэйлээ шалгаж, бүртгэлээ баталгаажуулна уу.");
+      alert("Registration successful. Please check your email to confirm your registration.");
       navigate("/login");
     }
   } ;
@@ -83,13 +83,13 @@ useEffect(() => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Бүртгүүлэх</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Register</h2>
         <form onSubmit={handleRegister} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Имэйл</label>
+            <label className="block text-sm font-medium text-gray-700">Email</label>
             <input
               type="email"
-              placeholder="Имэйлээ оруулна уу"
+              placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -97,10 +97,10 @@ useEffect(() => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Хэрэглэгчийн нэр</label>
+            <label className="block text-sm font-medium text-gray-700">Username</label>
             <input
               type="text"
-              placeholder="Нэрээ оруулна уу"
+              placeholder="Enter your username"
               value={displayname}
               onChange={(e) => setName(e.target.value)}
               required
@@ -108,29 +108,29 @@ useEffect(() => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Утасны дугаар (optional)</label>
+            <label className="block text-sm font-medium text-gray-700">Phone Number (optional)</label>
             <input
               type="tel"
-              placeholder="Утасны дугаараа оруулна уу"
+              placeholder="Enter your phone number"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 text-black"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Нууц үг</label>
+            <label className="block text-sm font-medium text-gray-700">Password</label>
             <input
               type="password"
-              placeholder="Нууц үгээ оруулна уу"
+              placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 text-black"
             />
-            <label className="block text-sm font-medium text-gray-700">Нууц үг дахин оруул</label>
+            <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
             <input
               type="password"
-              placeholder="Нууц үгээ оруулна уу"
+              placeholder="Enter your password again"
               value={password2}
               onChange={(e) => setPassword2(e.target.value)}
               required
@@ -141,14 +141,14 @@ useEffect(() => {
             type="submit"
             className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200"
           >
-            Бүртгүүлэх
+            Register
           </button>
         </form>
         {error && <p className="mt-4 text-red-500 text-center">{error}</p>}
         <p className="mt-4 text-center text-gray-600">
-          Бүртгэлтэй юу?{" "}
+          Already have an account?{" "}
           <a href="/login" className="text-blue-600 hover:underline">
-            Эндээс нэвтэрнэ үү
+            Click here to log in
           </a>
         </p>
       </div>

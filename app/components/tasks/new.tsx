@@ -20,7 +20,7 @@ export default function NewTask() {
 
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) {
-      setError("Та эхлээд нэвтэрнэ үү.");
+      setError("Please log in first.");
       return;
     }
 
@@ -46,18 +46,18 @@ export default function NewTask() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-black">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Шинэ даалгавар нэмэх</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Add New Task</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
-            placeholder="Гарчиг"
+            placeholder="Title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
             className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 text-black"
           />
           <textarea
-            placeholder="Тайлбар"
+            placeholder="Description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 text-black"
@@ -81,10 +81,10 @@ export default function NewTask() {
             type="submit"
             className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200"
           >
-            Нэмэх
+            Add
           </button>
           <button  className="w-full bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700 transition duration-200" onClick={() => navigate(-1)}>
-            Буцах
+            Back
           </button>
         </form>
         {error && <p className="mt-4 text-red-500 text-center">{error}</p>}

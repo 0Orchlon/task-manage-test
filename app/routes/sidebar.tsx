@@ -77,7 +77,6 @@ export default function Sidebar({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [editingId, addPeopleDialog]);
 
-  // Fetch users for the selected project
   const fetchProjectUsers = async () => {
     if (openProject !== null) {
       const { data, error } = await supabase
@@ -85,7 +84,7 @@ export default function Sidebar({
         .select("uid")
         .eq("proid", openProject);
       if (error) {
-        console.error("Хэрэглэгчдийг нэмэхэд алдаа гарлаа:", error.message);
+        console.error("Error to fetch project users:", error.message);
         return;
       }
       const userIds = data.map((item) => item.uid);
@@ -95,7 +94,7 @@ export default function Sidebar({
           .select("uid, uname, image")
           .in("uid", userIds);
         if (usersError) {
-          console.error("Хэрэглэгчийн мэдээлэл татахад алдаа гарлаа:", usersError.message);
+          console.error("Error to fetch user details:", usersError.message);
           return;
         }
         setProjectUsers((prev) => ({ ...prev, [openProject]: users || [] }));
@@ -122,8 +121,8 @@ export default function Sidebar({
       .update({ proname: newName })
       .eq("proid", proid);
     if (error) {
-      console.error("Проектыг шинэчлэхэд алдаа гарлаа:", error.message);
-      alert(`Проектын нэрийг шинэчлэхэд алдаа гарлаа: ${error.message}`);
+      console.error("Error to rename project:", error.message);
+      alert(`Error to rename project: ${error.message}`);
       return;
     }
     setLocalProjects((prev) =>
@@ -156,7 +155,7 @@ export default function Sidebar({
         .delete()
         .eq("proid", proid);
       if (usersError) {
-        alert("Хэрэглэгчдийг устгахад алдаа гарлаа: " + usersError.message);
+        alert("Error to remove users: " + usersError.message);
         return;
       }
 
@@ -165,7 +164,7 @@ export default function Sidebar({
         .delete()
         .eq("proid", proid);
       if (tasksError) {
-        alert("Даалгавруудыг устгахад алдаа гарлаа: " + tasksError.message);
+        alert("Error to remove tasks: " + tasksError.message);
         return;
       }
 
@@ -174,14 +173,14 @@ export default function Sidebar({
         .delete()
         .eq("proid", proid);
       if (projectError) {
-        alert("Проектыг устгахад алдаа гарлаа: " + projectError.message);
+        alert("Error to remove project: " + projectError.message);
         return;
       }
 
       onDeleteProject(proid);
       setDeletingId(null);
     } catch (error: any) {
-      alert("Проектыг устгахад алдаа гарлаа: " + error.message);
+      alert("Error to remove project: " + error.message);
     }
   };
 
@@ -192,14 +191,14 @@ export default function Sidebar({
         .delete()
         .eq("proid", proid)
         .eq("uid", uid);
-      if (error) throw new Error(`Хэрэглэгчийг устгахад алдаа гарлаа: ${error.message}`);
+      if (error) throw new Error(`Error to remove user: ${error.message}`);
       setProjectUsers((prev) => ({
         ...prev,
         [proid]: prev[proid]?.filter((user) => user.uid !== uid) || [],
       }));
     } catch (error: any) {
-      console.error("Хэрэглэгчийг устгахад алдаа гарлаа:", error.message);
-      alert(`Хэрэглэгчийг устгахад алдаа гарлаа: ${error.message}`);
+      console.error("Error to remove user:", error.message);
+      alert(`Error to remove user: ${error.message}`);
     }
   };
 
@@ -226,12 +225,12 @@ export default function Sidebar({
       ref={sidebarRef}
       className="w-64 bg-gray-800 text-white p-4 flex flex-col relative h-screen overflow-y-auto"
     >
-      <h2 className="text-lg font-semibold mb-4">МЭДЭЭЛЭЛ</h2>
+      <h2 className="text-lg font-semibold mb-4"> Notifications </h2>
       <Reminder />
 
       <h2 className="text-lg font-semibold mt-6 mb-4">Projects</h2>
       <ul className="space-y-2">
-        {localProjects.length === 0 && <li className="text-gray-400">Projects байхгүй</li>}
+        {localProjects.length === 0 && <li className="text-gray-400">No project</li>}
         {localProjects.map((project) => (
           <li key={project.proid} onContextMenu={(e) => handleContextMenu(e, project.proid)}>
             <div className="flex items-center justify-between">
@@ -273,7 +272,7 @@ export default function Sidebar({
             </div>
             {openProject === project.proid && (
               <div className="ml-6 mt-2">
-                <h4 className="text-sm font-medium mt-2">Багийн гишүүд:</h4>
+                <h4 className="text-sm font-medium mt-2">Group members:</h4>
                 <ul className="mt-1 space-y-1">
                   {(projectUsers[project.proid] || []).length > 0 ? (
                     projectUsers[project.proid]
@@ -304,7 +303,7 @@ export default function Sidebar({
                         </li>
                       ))
                   ) : (
-                    <li className="text-gray-500 text-sm">Гишүүд алга</li>
+                    <li className="text-gray-500 text-sm">No members</li>
                   )}
                 </ul>
               </div>
@@ -331,7 +330,7 @@ export default function Sidebar({
           </li>
         ))}
         <li className="text-blue-400 cursor-pointer" onClick={onNewProject}>
-          + ШИНЭ ПРОЖЕКТ
+          + new project
         </li>
       </ul>
 
@@ -357,7 +356,7 @@ export default function Sidebar({
                 className="px-2 py-1 hover:bg-gray-100 cursor-pointer"
                 onClick={() => handleAddPeople(contextMenu.proid, contextMenu.x, contextMenu.y)}
               >
-                <UserAddOutlined className="mr-2 text-blue-600" /> Хүн нэмэх
+                <UserAddOutlined className="mr-2 text-blue-600" /> add people
               </li>
               <li
                 className="px-2 py-1 hover:bg-gray-100 cursor-pointer"
@@ -369,7 +368,7 @@ export default function Sidebar({
                 className="px-2 py-1 hover:bg-gray-100 cursor-pointer"
                 onClick={handleCloseContextMenu}
               >
-                Цуцлах
+                cancel
               </li>
             </ul>
           </div>,
@@ -410,13 +409,13 @@ export default function Sidebar({
                   className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700"
                   onClick={() => alert("Тусламж хэсэгт холбоо барина уу!")}
                 >
-                  Тусламж
+                  help
                 </button>
                 <button
                   className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-700"
                   onClick={handleCloseAddPeopleDialog}
                 >
-                  Хаах
+                  close
                 </button>
               </div>
             </div>
