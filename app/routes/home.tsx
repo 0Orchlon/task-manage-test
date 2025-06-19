@@ -34,9 +34,8 @@ export default function Home() {
       const { data: tasksData, error: tasksError } = await supabase
         .from("t_tasks")
         .select("tid, title, description, status, due_date, priority")
-
         .eq("proid", selectedProjectId);
-
+        
       if (tasksError) {
         setError(`Даалгавруудыг татахад алдаа гарлаа: ${tasksError.message}`);
       } else {
@@ -196,7 +195,7 @@ export default function Home() {
           {!selectedProjectId ? (
             <p className="text-center text-gray-500">Төслийг сонгоно уу...</p>
           ) : (
-            <KanbanBoard tasks={tasks} onTaskUpdate={getTasks} />
+            <KanbanBoard tasks={tasks} proj={selectedProjectId} onTaskUpdate={getTasks} />
           )}
 
         </div>

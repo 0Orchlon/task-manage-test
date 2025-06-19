@@ -1,7 +1,13 @@
-// column.tsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import Task from "./Task";
+import { supabase } from "~/supabase";
+
+type User = {
+  uid: string;
+  uname: string;
+  image?: string | null;
+};
 
 type TaskType = {
   tid: number;
@@ -18,6 +24,7 @@ interface ColumnProps {
   tasks: TaskType[];
   onEdit: (updatedTask: TaskType) => void;
   onDelete: (tid: number | string) => void;
+  users: User[];
 }
 
 export default function Column({
@@ -26,8 +33,108 @@ export default function Column({
   tasks,
   onEdit,
   onDelete,
+  users,
 }: ColumnProps) {
   const { isOver, setNodeRef } = useDroppable({ id });
+
+  // Даалгавар бүрийн хэрэглэгчдийг хадгалах объект
+  const [assignedUsersMap, setAssignedUsersMap] = useState<Record<number, User[]>>({});
+
+  // Даалгаврын хэрэглэгчдийг татаж авах
+  useEffect(() => {
+    async function fetchAssignedUsers() {
+      if (!tasks.length) {
+        setAssignedUsersMap({});
+        return;
+      }
+      const taskIds = tasks.map((t) => t.tid);
+      const { data, error } = await supabase
+        .from("t_task_assigned")
+        .select("taskid, t_users(uid, uname, image)")
+        .in("taskid", taskIds);
+
+      if (error) {
+        console.error("Хэрэглэгчдийн мэдээлэл татахад алдаа гарлаа:", error);
+        setAssignedUsersMap({});
+        return;
+      }
+
+      const map: Record<number, User[]> = {};
+      data.forEach((row: any) => {
+        if (!map[row.taskid]) map[row.taskid] = [];
+        map[row.taskid].push(row.t_users);
+      });
+
+      setAssignedUsersMap(map);
+    }
+
+    fetchAssignedUsers();
+  }, [tasks]);
+
+  // Хэрэглэгч даалгаварт нэмэх/устгах функц
+  const assignUserToTask = async (taskId: number, userId: string) => {
+    // 1. Хэрэв байгаа эсэхийг шалгах
+    const { data: existing, error: selectError } = await supabase
+      .from("t_task_assigned")
+      .select("taid")
+      .eq("taskid", taskId)
+      .eq("tauid", userId)
+      .limit(1)
+      .single();
+
+    if (selectError && selectError.code !== "PGRST116") {
+      console.error("Error checking assignment:", selectError.message);
+      return;
+    }
+
+    if (existing) {
+      // Байгаа бол устгах
+      const { error: delError } = await supabase
+        .from("t_task_assigned")
+        .delete()
+        .eq("taid", existing.taid);
+
+      if (delError) {
+        console.error("Error removing user from task:", delError.message);
+        return;
+      }
+
+      // UI шинэчлэх: устгасан хэрэглэгчийг state-аас хасах
+      setAssignedUsersMap((prev) => {
+        const newMap = { ...prev };
+        newMap[taskId] = newMap[taskId].filter((u) => u.uid !== userId);
+        return newMap;
+      });
+
+      alert("Хэрэглэгч амжилттай устгагдлаа.");
+      return;
+    }
+
+    // Байхгүй бол шинээр нэмэх
+    const { error: insertError } = await supabase
+      .from("t_task_assigned")
+      .insert([{ taskid: taskId, tauid: userId }]);
+
+    if (insertError) {
+      console.error("Error assigning user:", insertError.message);
+      return;
+    }
+
+    // UI шинэчлэх: шинээр нэмсэн хэрэглэгчийг state-д нэмэх
+    const newUser = users.find((u) => u.uid === userId);
+    if (!newUser) {
+      alert("Хэрэглэгч олдсонгүй.");
+      return;
+    }
+
+    setAssignedUsersMap((prev) => {
+      const newMap = { ...prev };
+      newMap[taskId] = newMap[taskId] ? [...newMap[taskId], newUser] : [newUser];
+      return newMap;
+    });
+
+    alert("Хэрэглэгч амжилттай даалгаварт оноогдлоо.");
+  };
 
   return (
     <div
@@ -38,7 +145,7 @@ export default function Column({
     >
       <h3 className="text-lg font-semibold text-gray-700 mb-4">{title}</h3>
       {tasks.length === 0 ? (
-        <p className="text-sm text-gray-400">No tasks here.</p>
+        <p className="text-sm text-gray-400">Даалгавар байхгүй байна.</p>
       ) : (
         tasks.map((task) => (
           <Task
@@ -46,6 +153,9 @@ export default function Column({
             task={task}
             onEdit={onEdit}
             onDelete={onDelete}
+            users={users}
+            onAssign={assignUserToTask}
+            assignedUsers={assignedUsersMap[task.tid] || []}
           />
         ))
       )}
