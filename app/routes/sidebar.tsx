@@ -346,7 +346,7 @@ if (Array.isArray(projects)) {
             left: contextMenu.x,
             zIndex: 9999,
           }}
-          className="bg-white shadow rounded"
+          className="bg-white shadow rounded text-black"
         >
           <ul className="min-w-[150px]">
             <li
@@ -391,7 +391,7 @@ if (Array.isArray(projects)) {
             }}
             onClick={e => e.stopPropagation()}
           >
-              <h3 className="text-lg font-semibold mb-2">Хүн нэмэх</h3>
+              <h3 className="text-lg font-semibold mb-2 text-black">Хүн нэмэх</h3>
               <SearchUserAdd
                 proid={addPeopleDialog.proid}
                 onUserAdded={handleCloseAddPeopleDialog}
