@@ -95,6 +95,12 @@ useEffect(() => {
             Энд дарж бүртгүүлнэ үү
           </a>
         </p>
+                <p className="mt-4 text-center text-gray-600">
+          Нууц үгээ мартсан уу?{" "}
+          <a href="/forgotpass" className="text-blue-600 hover:underline">
+            Энд дарж Нууц үгээ сэргээн үү
+          </a>
+        </p>
       </div>
     </div>
   );
