@@ -172,6 +172,7 @@ export default function Home() {
   if (!user) {
     return <div>Ачааллаж байна...</div>;
   }
+const selectedProject = projects.find(p => p.proid === selectedProjectId);
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -188,7 +189,7 @@ export default function Home() {
 
         <div className="p-8">
           <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 overflow-auto">
-            Тавтай морил, {user.user_metadata?.displayname || user.email}!
+            Тавтай морил, {selectedProject?.proname ?? "Project"}!
           </h2>
           {error && <p className="mb-4 text-red-500 text-center">{error}</p>}
           <h3 className="text-xl font-semibold mb-4 text-black">Таны даалгаврууд</h3>
