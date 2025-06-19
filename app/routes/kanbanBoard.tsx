@@ -21,9 +21,7 @@ const STATUS_MAP: Record<number, "To Do" | "In Progress" | "Done"> = {
 
 const KanbanBoard: React.FC<{ tasks?: Task[] }> = ({ tasks = [] }) => {
   const [localTasks, setLocalTasks] = useState<Task[]>(tasks);
-
   const [sortBy, setSortBy] = useState<'due_date' | 'priority' | 'title'>('due_date');
-
 
   useEffect(() => {
     setLocalTasks(tasks);
@@ -142,7 +140,6 @@ const KanbanBoard: React.FC<{ tasks?: Task[] }> = ({ tasks = [] }) => {
               onDelete={handleDelete}
             />
           ))}
-
         </div>
       </div>
     </DndContext>
