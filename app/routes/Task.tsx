@@ -89,7 +89,16 @@ export default function Task({
     setIsEditing(false);
     alert("Амжилттай шинэчлэгдлээ!");
   };
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((word) => word[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 1);
+  };
 
+  
   return (
     <div
       style={style}
@@ -240,13 +249,20 @@ export default function Task({
       {/* Assigned Users Avatars */}
       <div className="flex space-x-2 mt-3">
         {assignedUsers.map((user) => (
-          <img
-            key={user.uid}
-            src={user.image || "/default-avatar.png"}
-            alt={user.uname}
-            title={user.uname}
-            className="w-7 h-7 rounded-full object-cover border border-gray-300"
-          />
+          user.image ? (
+            <img
+              key={user.uid}
+              src={user.image || "/default-avatar.png"}
+              alt={user.uname}
+              title={user.uname}
+              className="w-7 h-7 rounded-full object-cover border border-gray-300"
+            />
+
+          ): (
+            <div className="w-7 h-7 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
+              {getInitials(user.uname)}
+            </div>
+          )
         ))}
       </div>
 
