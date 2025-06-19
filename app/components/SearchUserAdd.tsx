@@ -9,7 +9,7 @@ interface User {
 
 interface Props {
   proid: number;
-  onUserAdded?: () => void;
+  onUserAdded?: (user: User) => void;
 }
 
 export default function SearchUserAdd({ proid, onUserAdded }: Props) {
@@ -66,10 +66,19 @@ export default function SearchUserAdd({ proid, onUserAdded }: Props) {
 
       if (error) throw error;
 
+      const { data: user } = await supabase
+        .from("t_users")
+        .select("uid, uname, image")
+        .eq("uid", uid)
+        .single();
+
+      if (user) {
+        onUserAdded(user);
+      }
+
       alert("Хэрэглэгч амжилттай нэмэгдлээ");
       setSearch("");
       setResults([]);
-      onUserAdded?.();
     } catch (err: any) {
       alert(`Хэрэглэгч нэмэхэд алдаа гарлаа: ${err.message}`);
     }
@@ -85,7 +94,7 @@ export default function SearchUserAdd({ proid, onUserAdded }: Props) {
       />
       {loading && <p className="text-sm text-gray-500 mt-1">Уншиж байна...</p>}
       {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
-      <ul className="mt-2 space-y-1 max-h-80 overflow-y-auto"> {/* max-h-40 -> max-h-80 болгосон */}
+      <ul className="mt-2 space-y-1 max-h-80 overflow-y-auto">
         {results.map((user) => (
           <li
             key={user.uid}
