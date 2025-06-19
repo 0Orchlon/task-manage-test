@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { supabase } from "~/supabase";
 import { useNavigate } from "react-router";
@@ -7,18 +7,33 @@ export default function Register() {
   const [displayname, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [password2, setPassword2] = useState<string>("");
   const [phone, setPhone] = useState<string>(""); 
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+useEffect(() => {
+    const checkSession = async () => {
+      const { data, error } = await supabase.auth.getSession();
+      if (data.session?.user) {
+        navigate("/"); // Redirect to index page
+      }
+    };
+    checkSession();
+  }, [navigate]);
+
 
   const handleRegister = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    // Supabase auth hereglegch burtgh
-    const { data: { user }, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
+    if (password !== password2){
+      setError("Нууц үг таарахгүй байна.")
+      return}
+
+      // Supabase auth hereglegch burtgh
+      const { data: { user }, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
       options: {
         data: {
           displayname,
@@ -63,7 +78,7 @@ export default function Register() {
       alert("Амжилттай бүртгэгдлээ. Имэйлээ шалгаж, бүртгэлээ баталгаажуулна уу.");
       navigate("/login");
     }
-  };
+  } ;
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
@@ -93,7 +108,7 @@ export default function Register() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Утасны дугаар</label>
+            <label className="block text-sm font-medium text-gray-700">Утасны дугаар (optional)</label>
             <input
               type="tel"
               placeholder="Утасны дугаараа оруулна уу"
@@ -109,6 +124,15 @@ export default function Register() {
               placeholder="Нууц үгээ оруулна уу"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 text-black"
+            />
+            <label className="block text-sm font-medium text-gray-700">Нууц үг дахин оруул</label>
+            <input
+              type="password"
+              placeholder="Нууц үгээ оруулна уу"
+              value={password2}
+              onChange={(e) => setPassword2(e.target.value)}
               required
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 text-black"
             />
