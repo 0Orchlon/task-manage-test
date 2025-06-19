@@ -116,7 +116,12 @@ useEffect(() => {
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-black">Your Profile</h2>
+          <button 
+            className="text-xl text-black bg-green-300 hover:bg-green-400 rounded-md"
+            onClick={async () => {
+              navigate("/")
+            }}
+          >Back to Home Page</button>
           <button
             onClick={async () => {
               navigate("/poo");
@@ -139,7 +144,10 @@ useEffect(() => {
             Log out
           </button>
         </div>
+<div>
+            <h2 className="text-xl font-bold text-black">Your Profile</h2>
 
+</div>
         {email ? (
           <>
             {imageUrl ? (
