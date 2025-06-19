@@ -215,7 +215,9 @@ export default function Task({ task, onEdit, onDelete }: TaskProps) {
       <div className="font-semibold text-gray-800 text-md mb-1">
         {task.title}
       </div>
-      <div className="text-sm text-gray-600">📝 Description: {task.description ? task.description : 'no description' } </div>
+      <div className="text-sm text-gray-600">
+        📝 Description: {task.description ? task.description : "no description"}{" "}
+      </div>
       <div className="text-sm text-gray-600">📅 Due: {task.due_date}</div>
       <div className="text-sm text-gray-600 mt-1">
         ⚡ Priority:{" "}

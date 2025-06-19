@@ -1,55 +1,59 @@
 import { useEffect, useState } from "react";
 import { supabase } from "~/supabase";
 import { useNavigate } from "react-router";
-
+import { FaArrowLeft } from "react-icons/fa";
+import { CiEdit } from "react-icons/ci";
+import { IoIosLogOut } from "react-icons/io";
 export default function Poo() {
   const [email, setEmail] = useState<string | null>(null);
   const [username, setUsername] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [projects, setProjects] = useState<
-  { proid: number; proname: string }[]
+    { proid: number; proname: string }[]
   >([]);
   const onSelectProject = (proid: number) => {
     console.log("Selected project ID:", proid);
-    navigate("/")
+    navigate("/");
     // Additional logic for selecting a project can go here
-  };  const navigate = useNavigate();
-
-useEffect(() => {
-  const getUserData = async () => {
-    const { data: authData, error: authError } = await supabase.auth.getUser();
-    if (authError || !authData.user) {
-      console.error("Error getting user:", authError?.message);
-      setEmail(null);
-      setUsername(null);
-      setImageUrl(null);
-      navigate("/");
-      return;
-    }
-
-    setEmail(authData.user.email ?? null);
-    setUserId(authData.user.id);
-
-    const { data: profileData, error: profileError } = await supabase
-      .from("t_users")
-      .select("uname, image")
-      .eq("uid", authData.user.id)
-      .single();
-
-    if (profileError) {
-      console.error("Error getting profile data:", profileError.message);
-      setUsername(null);
-      setImageUrl(null);
-      return;
-    }
-
-    setUsername(profileData.uname);
-    setImageUrl(profileData.image);
   };
+  const navigate = useNavigate();
 
-  getUserData();
-}, [navigate]);
+  useEffect(() => {
+    const getUserData = async () => {
+      const { data: authData, error: authError } =
+        await supabase.auth.getUser();
+      if (authError || !authData.user) {
+        console.error("Error getting user:", authError?.message);
+        setEmail(null);
+        setUsername(null);
+        setImageUrl(null);
+        navigate("/");
+        return;
+      }
+
+      setEmail(authData.user.email ?? null);
+      setUserId(authData.user.id);
+
+      const { data: profileData, error: profileError } = await supabase
+        .from("t_users")
+        .select("uname, image")
+        .eq("uid", authData.user.id)
+        .single();
+
+      if (profileError) {
+        console.error("Error getting profile data:", profileError.message);
+        setUsername(null);
+        setImageUrl(null);
+        return;
+      }
+
+      setUsername(profileData.uname);
+      setImageUrl(profileData.image);
+    };
+
+    getUserData();
+  }, [navigate]);
   useEffect(() => {
     const getUserData = async () => {
       const { data: authData, error: authError } =
@@ -116,56 +120,53 @@ useEffect(() => {
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
-          <button 
-            className="text-xl text-black bg-green-300 hover:bg-green-400 rounded-md"
-            onClick={async () => {
-              navigate("/")
-            }}
-          >Back to Home Page</button>
-          <button
-            onClick={async () => {
-              navigate("/poo");
-            }}
-            className="px-4 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-md text-sm"
-          >
-            Edit profile
-          </button>
-          <button
-            onClick={async () => {
-              const { error } = await supabase.auth.signOut();
-              if (error) {
-                console.error("Logout failed:", error.message);
-              } else {
-                navigate("/login");
-              }
-            }}
-            className="px-4 py-1 bg-red-500 hover:bg-red-600 text-white rounded-md text-sm"
-          >
-            Log out
-          </button>
+          <FaArrowLeft
+            className="text-gray-600 cursor-pointer"
+            onClick={() => navigate("/")}
+          />
         </div>
-<div>
-            <h2 className="text-xl font-bold text-black">Your Profile</h2>
 
-</div>
+        <h2 className="text-xl font-bold text-black mb-4">Your Profile</h2>
+
         {email ? (
           <>
-            {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt="Profile"
-                className="w-24 h-24 rounded-full mx-auto mb-4 object-cover border"
+            <div className="flex items-center space-x-4 mb-6">
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt="Profile"
+                  className="w-24 h-24 rounded-full object-cover border"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 border">
+                  No image
+                </div>
+              )}
+              <div>
+                {username && (
+                  <div className="flex items-center mt-[-20px]">
+                    <p className="text-lg font-semibold text-black">
+                      Hello, <span className="text-blue-600">{username}</span>
+                    </p>
+                    <CiEdit
+                      className="ml-2 text-gray-500 cursor-pointer hover:text-blue-600"
+                      onClick={() => navigate("/poo")}
+                    />
+                  </div>
+                )}
+                {email && <p className="text-gray-700 text-xs">{email}</p>}
+              </div>
+              <IoIosLogOut
+                className="text-gray-500 cursor-pointer hover:text-red-600 text-2xl ml-auto mt-[-20px]"
+                onClick={async () => {
+                  const { error } = await supabase.auth.signOut();
+                  if (!error) navigate("/login");
+                  else console.error("Logout failed:", error.message);
+                }}
               />
-            ) : (
-              <p className="text-center text-gray-500 mb-4">No profile image</p>
-            )}
+            </div>
 
-            {username && (
-              <p className="text-center text-lg font-semibold mb-4 text-black">
-                Hello, <span className="text-blue-600">{username}</span>
-              </p>
-            )}
-            {/* 👇 Project list section */}
+            {/* Project list section */}
             <div className="mt-8">
               <h3 className="text-lg font-semibold mb-2 text-black">
                 Your Projects
@@ -177,13 +178,7 @@ useEffect(() => {
                   {projects.map((proj) => (
                     <li
                       key={proj.proid}
-                      
-                      onClick={() =>{
-
-                        onSelectProject(proj.proid);
-                        // navigate(`/`);
-                      }
-                      }
+                      onClick={() => onSelectProject(proj.proid)}
                       className="cursor-pointer text-blue-700 hover:underline"
                     >
                       🔹 {proj.proname}
