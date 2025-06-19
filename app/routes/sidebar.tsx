@@ -95,7 +95,7 @@ if (Array.isArray(projects)) {
         if (userIds.length > 0) {
           const { data: users, error: usersError } = await supabase
             .from("t_users")
-            .select("uid, uname, image")
+            .select("uid, uname, image")  
             .in("uid", userIds);
           if (usersError) {
             console.error("Хэрэглэгчийн мэдээлэл татахад алдаа гарлаа:", usersError.message);

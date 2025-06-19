@@ -1,4 +1,3 @@
-// kanbanBoard.tsx
 import React, { useState, useEffect } from 'react';
 import { supabase } from "~/supabase";
 import { DndContext } from '@dnd-kit/core';
@@ -13,21 +12,104 @@ type Task = {
   status: number;
 };
 
+type User = {
+  uid: string;
+  email: string;
+  uname?: string;
+};
+
 const STATUS_MAP: Record<number, "To Do" | "In Progress" | "Done"> = {
   1: "To Do",
   2: "In Progress",
   3: "Done",
 };
 
-const KanbanBoard: React.FC<{ tasks?: Task[] }> = ({ tasks = [] }) => {
+const KanbanBoard: React.FC<{ tasks?: Task[];proj: string; }> = ({ tasks = [], proj  }) => {
   const [localTasks, setLocalTasks] = useState<Task[]>(tasks);
-
+  const [users, setUsers] = useState<User[]>([]);
   const [sortBy, setSortBy] = useState<'due_date' | 'priority' | 'title'>('due_date');
-
 
   useEffect(() => {
     setLocalTasks(tasks);
   }, [tasks]);
+
+useEffect(() => {
+const fetchUsers = async () => {
+  const { data, error } = await supabase
+    .from("t_project_users")
+    .select(`
+      uid,
+      t_users!inner(uname, image)
+    `)
+    .eq("proid", proj);
+
+  if (error) {
+    console.error("Failed to fetch users", error);
+  } else {
+    const flatUsers = data.map((entry) => ({
+      uid: entry.uid,
+      uname: entry.t_users.uname,
+      // email: entry.auth_users.Email,
+      image: entry.t_users.image || '',
+    }));
+    console.log("Fetched users:", flatUsers);
+    setUsers(flatUsers);
+  }
+  
+};
+
+
+  if (proj) {
+    fetchUsers();
+  }
+}, [proj]); // 👈 add proj as dependency
+const assignUserToTask = async (taskId: number, userId: string) => {
+  console.log("Assigning user:", userId, "to task:", taskId);
+
+  // 1. Хэрэв байгаа эсэхийг шалгах
+  const { data: existing, error: selectError } = await supabase
+    .from("t_task_assigned")
+    .select("taid")
+    .eq("taskid", taskId)
+    .eq("tauid", userId)
+    .limit(1)
+    .single();
+
+  if (selectError && selectError.code !== 'PGRST116') {
+    console.error("Error checking assignment:", selectError.message);
+    return;
+  }
+
+  console.log("User already assigned to task:", existing);
+  if (existing) {
+    // existing нь { taid: number } гэж бодож байна
+    const taid = existing.taid;
+    const { error: delError } = await supabase
+      .from("t_task_assigned")
+      .delete()
+      .eq("taid", taid);
+
+    if (delError) {
+      console.error("Error removing user from task:", delError.message);
+    } else {
+      alert("Хэрэглэгч амжилттай устгагдлаа.");
+    }
+    return;
+  }
+
+  // 2. Байхгүй бол шинээр нэмэх
+  const { error: insertError } = await supabase
+    .from("t_task_assigned")
+    .insert([{ taskid: taskId, tauid: userId }]);
+
+  if (insertError) {
+    console.error("Error assigning user:", insertError.message);
+  } else {
+    alert("Хэрэглэгч амжилттай даалгаварт оноогдлоо.");
+  }
+};
+
+
 
   const getStatusFromId = (id: string): number => {
     switch (id) {
@@ -133,16 +215,17 @@ const KanbanBoard: React.FC<{ tasks?: Task[] }> = ({ tasks = [] }) => {
                 statusId === "1"
                   ? "todo"
                   : statusId === "2"
-                  ? "in-progress"
-                  : "done"
+                    ? "in-progress"
+                    : "done"
               }
               title={title}
               tasks={sortTasks(localTasks.filter((t) => t.status === parseInt(statusId)))}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              users={users} 
+              onAssign={assignUserToTask}
             />
           ))}
-
         </div>
       </div>
     </DndContext>

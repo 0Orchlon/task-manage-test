@@ -1,10 +1,8 @@
-// Task.tsx
 import React, { useEffect, useState } from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { RxDragHandleDots2 } from "react-icons/rx";
-import { supabase } from "~/supabase";
 
 interface Task {
   tid: number;
@@ -15,10 +13,19 @@ interface Task {
   status: number;
 }
 
+interface User {
+  uid: string;
+  uname: string;
+  image?: string | null;
+}
+
 interface TaskProps {
   task: Task;
+  users: User[];           // All project users
+  assignedUsers: User[];   // Assigned users for this task
   onEdit: (updatedTask: Task) => void;
   onDelete: (tid: number | string) => void;
+  onAssign: (taskId: number, userId: string) => void;
 }
 
 const getPriorityColor = (priority: string): string => {
@@ -34,7 +41,14 @@ const getPriorityColor = (priority: string): string => {
   }
 };
 
-export default function Task({ task, onEdit, onDelete }: TaskProps) {
+export default function Task({
+  task,
+  users,
+  assignedUsers,
+  onEdit,
+  onDelete,
+  onAssign,
+}: TaskProps) {
   const [openDropdown, setOpenDropdown] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<Task>(task);
@@ -62,20 +76,14 @@ export default function Task({ task, onEdit, onDelete }: TaskProps) {
 
   const handleEditSave = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const updatedTask = {
       ...editForm,
-      status: task.status,
+      status: task.status, // keep status unchanged here
     };
 
-    const { error } = await supabase
-      .from("t_tasks")
-      .update(updatedTask)
-      .eq("tid", task.tid);
-
-    if (error) {
-      alert("Update error: " + error.message);
-      return;
-    }
+    // Your update logic here: for example, call your API or supabase to update task
+    // Then call onEdit with updated task
 
     onEdit(updatedTask);
     setIsEditing(false);
@@ -87,6 +95,7 @@ export default function Task({ task, onEdit, onDelete }: TaskProps) {
       style={style}
       className="relative bg-white border border-gray-200 rounded-lg p-4 mb-3 shadow-sm hover:shadow-md transition-shadow text-black"
     >
+      {/* Header: Dropdown + Drag Handle */}
       <div className="flex justify-between items-center text-gray-500 text-sm mb-1">
         <span></span>
         <div className="flex items-center space-x-1">
@@ -108,6 +117,7 @@ export default function Task({ task, onEdit, onDelete }: TaskProps) {
         </div>
       </div>
 
+      {/* Dropdown Menu */}
       {openDropdown && (
         <div className="dropdown-menu absolute right-2 top-10 w-40 bg-white border rounded-md shadow-md z-10">
           <button
@@ -212,12 +222,9 @@ export default function Task({ task, onEdit, onDelete }: TaskProps) {
         </div>
       )}
 
-      <div className="font-semibold text-gray-800 text-md mb-1">
-        {task.title}
-      </div>
-      <div className="text-sm text-gray-600">
-        📝 Description: {task.description ? task.description : "no description"}{" "}
-      </div>
+      {/* Task Info */}
+      <div className="font-semibold text-gray-800 text-md mb-1">{task.title}</div>
+      <div className="text-sm text-gray-600">📝 Description: {task.description || "no description"}</div>
       <div className="text-sm text-gray-600">📅 Due: {task.due_date}</div>
       <div className="text-sm text-gray-600 mt-1">
         ⚡ Priority:{" "}
@@ -228,6 +235,39 @@ export default function Task({ task, onEdit, onDelete }: TaskProps) {
         >
           {task.priority}
         </span>
+      </div>
+
+      {/* Assigned Users Avatars */}
+      <div className="flex space-x-2 mt-3">
+        {assignedUsers.map((user) => (
+          <img
+            key={user.uid}
+            src={user.image || "/default-avatar.png"}
+            alt={user.uname}
+            title={user.uname}
+            className="w-7 h-7 rounded-full object-cover border border-gray-300"
+          />
+        ))}
+      </div>
+
+      {/* Assign Member Dropdown */}
+      <div className="mt-3">
+        <select
+          onChange={(e) => {
+            if (e.target.value) {
+              onAssign(task.tid, e.target.value);
+              e.target.value = "";
+            }
+          }}
+          className="w-full text-sm px-2 py-1 border rounded text-black bg-white"
+        >
+          <option value="">+ Assign member</option>
+          {users.map((u) => (
+            <option key={u.uid} value={u.uid}>
+              {u.uname}
+            </option>
+          ))}
+        </select>
       </div>
     </div>
   );
