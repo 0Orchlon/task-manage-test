@@ -144,21 +144,40 @@ if (Array.isArray(projects)) {
 
   const confirmDelete = async (proid: number) => {
     try {
+      // buh hereglegchdiig ustgana
+      const { error: usersError } = await supabase
+        .from("t_project_users")
+        .delete()
+        .eq("proid", proid);
+      if (usersError) {
+        alert("Хэрэглэгчдийг устгахад алдаа гарлаа: " + usersError.message);
+        return;
+      }
+
+      // buh task ustgana
       const { error: tasksError } = await supabase
         .from("t_tasks")
         .delete()
         .eq("proid", proid);
-      if (tasksError) throw new Error(`Даалгавруудыг устгахад алдаа гарлаа: ${tasksError.message}`);
+      if (tasksError) {
+        alert("Даалгавруудыг устгахад алдаа гарлаа: " + tasksError.message);
+        return;
+      }
+
+      // tusluu ustgana
       const { error: projectError } = await supabase
         .from("t_project")
         .delete()
         .eq("proid", proid);
-      if (projectError) throw new Error(`Проектыг устгахад алдаа гарлаа: ${projectError.message}`);
+      if (projectError) {
+        alert("Проектыг устгахад алдаа гарлаа: " + projectError.message);
+        return;
+      }
+
       onDeleteProject(proid);
       setDeletingId(null);
     } catch (error: any) {
-      console.error("Проектыг устгахад алдаа гарлаа:", error.message);
-      alert(`Проектыг устгахад алдаа гарлаа: ${error.message}`);
+      alert("Проектыг устгахад алдаа гарлаа: " + error.message);
     }
   };
 
@@ -290,13 +309,13 @@ if (Array.isArray(projects)) {
                     className="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700"
                     onClick={() => confirmDelete(project.proid)}
                   >
-                    Баталгаажуулах
+                    Confirm
                   </button>
                   <button
                     className="bg-gray-500 text-white px-2 py-1 rounded hover:bg-gray-700"
                     onClick={() => setDeletingId(null)}
                   >
-                    Цуцлах
+                    Cancel
                   </button>
                 </div>
               </div>
