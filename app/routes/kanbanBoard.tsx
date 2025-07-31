@@ -92,7 +92,7 @@ const assignUserToTask = async (taskId: number, userId: string) => {
     if (delError) {
       console.error("Error removing user from task:", delError.message);
     } else {
-      alert("User removed from task successfully");
+      alert("Хэрэглэгч амжилттай устгагдлаа.");
     }
     return;
   }
@@ -105,7 +105,7 @@ const assignUserToTask = async (taskId: number, userId: string) => {
   if (insertError) {
     console.error("Error assigning user:", insertError.message);
   } else {
-    alert("User added successfully");
+    alert("Хэрэглэгч амжилттай даалгаварт оноогдлоо.");
   }
 };
 
